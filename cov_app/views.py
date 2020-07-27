@@ -30,9 +30,9 @@ def processImage(): #POST
     #     return False
     
     # #call service to process dicom and return URL
-    # dicomImage = "dicom" #request.files["dicomImage"]
-    # path = app.root_path
-    # print("START SERVICE")
+    dicomImage = "dicom" #request.files["dicomImage"]
+    path = app.root_path
+    print("START SERVICE")
     # result = services.processImage(path, dicomImage)
 
     return "DONE" #result #accessCode
