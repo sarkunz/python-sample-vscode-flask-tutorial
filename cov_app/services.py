@@ -1,7 +1,7 @@
 # services- business logic of API
 import datetime
 import pydicom
-import cv2
+#import cv2
 import os
 from .models import CovidAppModel
 
