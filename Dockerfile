@@ -26,14 +26,15 @@ WORKDIR /cov_app
 # Copy the app contents to the image
 COPY . /cov_app
 
-#for opencv
-RUN apt-get update 
-RUN apt-get -y install libgtk2.0-dev
-#RUN apt-get -y install libsm6 \ libxrender-dev \ libxext6
-
 # If you have additional requirements beyond Flask (which is included in the
 # base image), generate a requirements.txt file with pip freeze and uncomment
 # the next three lines.
 COPY requirements.txt /
 RUN pip install --no-cache-dir -U pip
+
+#for opencv
+RUN apt-get update 
+RUN apt-get install libgtk2.0-0
+#RUN apt-get -y install libsm6 \ libxrender-dev \ libxext6
+
 RUN pip install --no-cache-dir -r /requirements.txt
