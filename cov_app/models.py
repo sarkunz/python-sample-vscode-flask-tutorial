@@ -9,6 +9,9 @@ from pymongo import MongoClient
 #from . import mongo
 import random
 
+import logging
+logger = logging.getLogger(__name__)
+
 class CovidAppModel:
     def __init__(self):
         #connect to 
@@ -28,6 +31,7 @@ class CovidAppModel:
         self.mongoCli = MongoClient('mongodb+srv://skunzler:sarah96@cluster0.22wsg.azure.mongodb.net/<dbname>?retryWrites=true&w=majority')
 
     def createDbEntry(self, dicomInfo):
+        logger.warning("MODEL CREATE DB ENTRY")
         studies_coll = self.mongoCli.db.studies
         #check for study & series ID (id)
         #if not created, add it
