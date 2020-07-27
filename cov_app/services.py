@@ -38,10 +38,10 @@ class CovidAppServices:
         #     dicomInfo[key] = value
 
         #add dicom info to db
-        # status, accessCode = self.model.createDbEntry(dicomInfo)
-        # if not status:
-        #     resp = "Failed to create DB entry."
-        #     return resp
+        status, accessCode = self.model.createDbEntry(dicomInfo)
+        if not status:
+            resp = "Failed to create DB entry."
+            return resp
 
         # #upload dicoms to azure
         # status = self.model.uploadDicomToBlob(accessCode, inputdir)
