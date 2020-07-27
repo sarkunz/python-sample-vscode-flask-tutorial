@@ -33,9 +33,9 @@ def processImage(): #POST
     dicomImage = "dicom" #request.files["dicomImage"]
     path = app.root_path
     print("START SERVICE")
-    # result = services.processImage(path, dicomImage)
+    result = services.processImage(path, dicomImage)
 
-    return "DONE" #result #accessCode
+    return result #result #accessCode
 
 #fetches report (HTML)
 #inp: access code, outp: html

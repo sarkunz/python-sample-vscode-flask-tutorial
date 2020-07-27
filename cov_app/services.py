@@ -31,35 +31,36 @@ class CovidAppServices:
                         'SOPID' : 'SOPID',
                         'imgCount' : 1
                     }
+        resp = "made it here"
         # data = pydicom.read_file(inputdir)
         # for key in data.dir():
         #     value = getattr(data, key, '')
         #     dicomInfo[key] = value
 
         #add dicom info to db
-        status, accessCode = self.model.createDbEntry(dicomInfo)
-        if not status:
-            resp = "Failed to create DB entry."
-            return resp
+        # status, accessCode = self.model.createDbEntry(dicomInfo)
+        # if not status:
+        #     resp = "Failed to create DB entry."
+        #     return resp
 
-        #upload dicoms to azure
-        status = self.model.uploadDicomToBlob(accessCode, inputdir)
-        if not status:
-            resp = "Failed to upload Dicom to Blob"
-            return resp
+        # #upload dicoms to azure
+        # status = self.model.uploadDicomToBlob(accessCode, inputdir)
+        # if not status:
+        #     resp = "Failed to upload Dicom to Blob"
+        #     return resp
 
-        resp = accessCode
+        # resp = accessCode
 
-        #convert to png --move to queue
-        #test_list = [ f for f in  os.listdir(inputdir)]
-        # for f in test_list[:10]:   # remove "[:10]" to convert all images 
-        #     ds = pydicom.read_file(inputdir + f) # read dicom image
-        #     print(inputdir + f)
-        #     img = ds.pixel_array # get image array
-        #     print(img.dtype)
-        #     cv2.imwrite(outdir + f.replace('.dcm','.png'),img) # write png image
+        # #convert to png --move to queue
+        # #test_list = [ f for f in  os.listdir(inputdir)]
+        # # for f in test_list[:10]:   # remove "[:10]" to convert all images 
+        # #     ds = pydicom.read_file(inputdir + f) # read dicom image
+        # #     print(inputdir + f)
+        # #     img = ds.pixel_array # get image array
+        # #     print(img.dtype)
+        # #     cv2.imwrite(outdir + f.replace('.dcm','.png'),img) # write png image
 
-        print("END PROCESS SERVICE")
+        # print("END PROCESS SERVICE")
         return resp
 
     def isValidToken(self, token):
