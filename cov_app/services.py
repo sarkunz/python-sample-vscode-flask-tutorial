@@ -5,6 +5,9 @@ import pydicom
 import os
 from .models import CovidAppModel
 
+import logging
+logger = logging.getLogger(__name__)
+
 class CovidAppServices:
     def __init__(self):
         self.model = CovidAppModel()
@@ -15,6 +18,7 @@ class CovidAppServices:
     #takes anonymized file, opens dicom, takes minimal info
     #adds dicom to work queue, looks up mongo record, creates and rets URL
     def processImage(self, path, dicom):
+        logger.info("START PROCESS IMAGE SERVICE")
         #open dicom, get infoseries-000001/	
         inp = "static\\images\\series-000001\\"
         outp = "static\\images\\pngs\\"

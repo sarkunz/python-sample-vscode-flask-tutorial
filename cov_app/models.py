@@ -31,7 +31,7 @@ class CovidAppModel:
         self.mongoCli = MongoClient('mongodb+srv://skunzler:sarah96@cluster0.22wsg.azure.mongodb.net/<dbname>?retryWrites=true&w=majority')
 
     def createDbEntry(self, dicomInfo):
-        logger.warning("MODEL CREATE DB ENTRY")
+        logger.info("MODEL CREATE DB ENTRY")
         studies_coll = self.mongoCli.db.studies
         #check for study & series ID (id)
         #if not created, add it
