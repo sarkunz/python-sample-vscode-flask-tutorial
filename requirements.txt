@@ -4,3 +4,13 @@ itsdangerous==0.24
 Jinja2>=2.10.1
 MarkupSafe==1.0
 Werkzeug==0.15.5
+
+pydicom
+opencv-python
+azure-storage-queue==2.1.0
+azure-storage-blob==2.1.0
+pillow
+pymongo
+flask_pymongo
+python-dotenv
+dnspython
