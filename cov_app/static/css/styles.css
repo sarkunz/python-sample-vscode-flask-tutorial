@@ -1,0 +1,53 @@
+/*styles for report*/
+
+body{
+    font-family: sans-serif;
+
+    padding:0.2em;
+    margin-left:2em;
+    margin-right:2em;
+}
+
+h1 {
+    font-size: 1.2em; 
+    padding-top:0.6em;
+}
+
+h2 {
+    font-size:1em;
+    padding-top:0.6em;
+ }
+
+p {
+    font-size: .8em;
+    margin-block-start: 0.4em;
+    margin-block-end: 0.4em;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+.center{
+    display: flex;
+    justify-content: center;
+}
+
+.right{
+    /* text-align: right;
+    width: 100%; */
+    display:flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.left {
+    display:flex;
+    flex-direction: column;
+    align-items: flex-start;
+}

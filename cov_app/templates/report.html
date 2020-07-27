@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+     content="width=device-width, initial-scale=1, user-scalable=yes">
+     <!--link rel="stylesheet" href="styles.css"-->
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+  <!--TODO: GET BRANDING HEADERS-->
+  <title>Novarad COVIDAI Analysis</title>
+  <h1 class="center"> NOVARAD COVIDAI ANALYSIS</h1>
+  {% if info %}
+      <div class="right">
+        <h2>Blue Rock Medical {{ info.facility }}</h2>
+        <p>Test Date {{info.studyDate}}</p>
+        <p>Test Time {{info.studyTime}}</p>
+      </div>
+
+      <div class="left">
+        <h1>Diagnosis</h1>
+        <p>Ground glass particulates consistent with COVID19 present: {{info.overall}}</p>
+        <p>Confidence level: {{info.pred}}</p>
+        <p>percent of CT showing ground glass particulates: {{info.percShown}}</p>
+      </div>
+
+      <div class="left">
+        <h1>Detailed Summary</h1>
+        <p>Ground glass particulates found in the following images</p>
+        <!--TODO: IMAGES-->
+        <table>
+          <tr>
+            <td>1-3</td>
+            <td>120-145</td>
+            <td>150-158</td>
+          </tr>
+          <tr>
+            <td>IMG1</td>
+            <td>IMG2</td>
+            <td>IMG3</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="left">
+        <h1>Recommendations</h1>
+        <p>{{info.recommendation}}</p>
+      </div>
+      {% else %}
+    <h2>Data has not yet been processed. Please reload or check back soon.</h2>
+  {% endif %}
+</body>

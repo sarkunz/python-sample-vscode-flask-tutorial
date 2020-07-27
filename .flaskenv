@@ -1,0 +1,2 @@
+FLASK_APP=cov_app.webapp
+FLASK_ENVIRONMENT=development
