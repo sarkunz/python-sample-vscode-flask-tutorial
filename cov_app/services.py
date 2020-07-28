@@ -42,15 +42,14 @@ class CovidAppServices:
         if not status:
             resp = "Failed to create DB entry."
             return resp
-        resp = "made it to db"
 
         #upload dicoms to azure
-        status = self.model.uploadDicomToBlob(accessCode, inputdir)
-        if not status:
-            resp = "Failed to upload Dicom to Blob"
-            return resp
+        # status = self.model.uploadDicomToBlob(accessCode, inputdir)
+        # if not status:
+        #     resp = "Failed to upload Dicom to Blob"
+        #     return resp
 
-        resp = accessCode
+        resp = accessCode + " " + inputdir
 
         # #convert to png --move to queue
         # #test_list = [ f for f in  os.listdir(inputdir)]
