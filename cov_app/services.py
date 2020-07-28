@@ -31,7 +31,7 @@ class CovidAppServices:
                         'SOPID' : 'SOPID',
                         'imgCount' : 1
                     }
-        resp = "made it here"
+        
         # data = pydicom.read_file(inputdir)
         # for key in data.dir():
         #     value = getattr(data, key, '')
@@ -42,14 +42,15 @@ class CovidAppServices:
         if not status:
             resp = "Failed to create DB entry."
             return resp
+        resp = "made it to db"
 
-        # #upload dicoms to azure
-        # status = self.model.uploadDicomToBlob(accessCode, inputdir)
-        # if not status:
-        #     resp = "Failed to upload Dicom to Blob"
-        #     return resp
+        #upload dicoms to azure
+        status = self.model.uploadDicomToBlob(accessCode, inputdir)
+        if not status:
+            resp = "Failed to upload Dicom to Blob"
+            return resp
 
-        # resp = accessCode
+        resp = accessCode
 
         # #convert to png --move to queue
         # #test_list = [ f for f in  os.listdir(inputdir)]
