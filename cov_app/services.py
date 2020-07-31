@@ -4,6 +4,7 @@ import pydicom
 #import cv2
 import os
 from .models import CovidAppModel
+import socket
 
 import logging
 logger = logging.getLogger(__name__)
@@ -19,39 +20,37 @@ class CovidAppServices:
     #adds dicom to work queue, looks up mongo record, creates and rets URL
     def processImage(self, path, dicom):
         logger.info("START PROCESS IMAGE SERVICE")
-        #open dicom, get infoseries-000001/	
-        inp = "static\\images\\series-000001\\"
+        
         outp = "static\\images\\pngs\\"
-        inputdir = os.path.join(path, inp)
         outdir = os.path.join(path, outp)
-
-        dicomInfo = {'studyID' : 'STUDYID',
-                        'seriesID' : 'SERIESID',
-                        'siteCode' : 'SITECODE',
-                        'SOPID' : 'SOPID',
-                        'imgCount' : 1
+        
+        print("processing dicom")
+        dicomData = pydicom.dcmread(dicom, force=True)
+        dicomInfo = {'studyID' :dicomData.StudyInstanceUID, 
+                        'seriesID' : dicomData.SeriesInstanceUID,
+                        'siteCode' : 'UI-RAI', #TODO how are we getting this?
+                        'studyDate' : dicomData.StudyDate,
+                        'SOPID' : dicomData.SOPClassUID,
+                        'imgName' : str(dicom.filename)
                     }
         
-        # data = pydicom.read_file(inputdir)
-        # for key in data.dir():
-        #     value = getattr(data, key, '')
-        #     dicomInfo[key] = value
-
         #add dicom info to db
         status, accessCode = self.model.createDbEntry(dicomInfo)
         if not status:
             resp = "Failed to create DB entry."
             return resp
 
+        #TODO thread this
         #upload dicoms to azure
-        # status = self.model.uploadDicomToBlob(accessCode, inputdir)
-        # if not status:
-        #     resp = "Failed to upload Dicom to Blob"
-        #     return resp
+        status = self.model.uploadDicomToBlob(accessCode, dicomInfo['imgName'], dicomData.pixel_array) #TODO  change key from accesscode
+        if not status:
+            resp = "Failed to upload Dicom to Blob"
+            return resp
 
-        resp = accessCode + " " + inputdir
+        #FOR NOW USING STUDY ID- TODO CONVERT TO HASHMAP
+        resp = dicomInfo['studyID'] #accessCode + " " + dicomInfo['studyID'] + "/" + dicomInfo['seriesID']
 
-        # #convert to png --move to queue
+        # #convert to png --moved to function
         # #test_list = [ f for f in  os.listdir(inputdir)]
         # # for f in test_list[:10]:   # remove "[:10]" to convert all images 
         # #     ds = pydicom.read_file(inputdir + f) # read dicom image
@@ -61,12 +60,14 @@ class CovidAppServices:
         # #     cv2.imwrite(outdir + f.replace('.dcm','.png'),img) # write png image
 
         # print("END PROCESS SERVICE")
-        return resp
+        hostname = socket.gethostname()    
+        IPAddr = socket.gethostbyname(hostname)  
+        return 'http://' + str(IPAddr) + ':5000/fetchReport/' + resp
 
     def isValidToken(self, token):
         #check for token in DB
         return True
 
-    def getReportInfo(self, accessCode):
-        info = self.model.getImageInfo(params=accessCode)
+    def getReportInfo(self, studyID):
+        info = self.model.getImageInfo(studyID)
         return info

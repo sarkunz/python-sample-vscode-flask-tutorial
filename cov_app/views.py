@@ -13,34 +13,38 @@ logger.setLevel(logging.DEBUG)
 
 
 #To delete
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def whatup():
     return "Heyyyyyy"
 
 #inp: dicom, outp: url  
 # auth token in header
-@app.route("/processImage")#, method="POST")
+@app.route("/processImage", methods=["GET", "POST"])
 def processImage(): #POST
-    logger.info("START PROCESS IMAGE")
-    #check for valid token (from header)
-    services = CovidAppServices()
-    # token = "token" #request.headers.get('authtoken')
-    # validAuthToken = services.isValidToken(token)
-    # if not validAuthToken:
-    #     return False
-    
-    # #call service to process dicom and return URL
-    dicomImage = "dicom" #request.files["dicomImage"]
-    path = app.root_path
-    print("START SERVICE")
-    result = services.processImage(path, dicomImage)
+    print("process image")
+    if request.method == "POST":
+        logger.info("START PROCESS IMAGE")
 
+        services = CovidAppServices()
+        
+        #print(dicomImage)
+        print("here")
+        dicomImage = request.files["dicom"]
+        if(dicomImage.filename.find('.dcm') == -1):
+            return "Invalid upload file type"
+        print("PROCESSING", dicomImage.filename)
+        path = app.root_path
+        result = services.processImage(path, dicomImage)
+        print(result)
+
+    else:
+        result = "Novarad Home Page"
     return result #result #accessCode
 
 #fetches report (HTML)
 #inp: access code, outp: html
 @app.route("/fetchReport/<accessCode>")
-def fetchReport(accessCode): #GETI 
+def fetchReport(accessCode): #GET
     #accessCode = #request.data["accessCode"]
     print(accessCode)
     info = CovidAppServices().getReportInfo(accessCode)

@@ -12,18 +12,21 @@
   <!--TODO: GET BRANDING HEADERS-->
   <title>Novarad COVIDAI Analysis</title>
   <h1 class="center"> NOVARAD COVIDAI ANALYSIS</h1>
+  
   {% if info %}
+      <h2 class="left"> Study Code: {{info.accessCode}} </h2>
+      <p class="left">Images Recieved: {{info.numImgs}}</p>
       <div class="right">
-        <h2>Blue Rock Medical {{ info.facility }}</h2>
-        <p>Test Date {{info.studyDate}}</p>
-        <p>Test Time {{info.studyTime}}</p>
+        <h2>{{ info.facility }}</h2>
+        <p>Test Date: {{info.studyDate}}</p>
+        <!--p>Test Time: {{info.studyTime}}</p-->
       </div>
 
       <div class="left">
         <h1>Diagnosis</h1>
         <p>Ground glass particulates consistent with COVID19 present: {{info.overall}}</p>
         <p>Confidence level: {{info.pred}}</p>
-        <p>percent of CT showing ground glass particulates: {{info.percShown}}</p>
+        <p>Percent of CT showing ground glass particulates: {{info.percShown}}</p>
       </div>
 
       <div class="left">
@@ -47,6 +50,10 @@
       <div class="left">
         <h1>Recommendations</h1>
         <p>{{info.recommendation}}</p>
+      </div>
+
+      <div class="left">
+        <p style="margin-top:2em">Report available until: {{info.availUntil}}</p>
       </div>
       {% else %}
     <h2>Data has not yet been processed. Please reload or check back soon.</h2>
