@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)
 
 
 #To delete
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def whatup():
     return "Heyyyyyy"
 
