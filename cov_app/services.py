@@ -13,8 +13,15 @@ class CovidAppServices:
     
     def create(self, params):
         self.model.create(params)
+
+    def getHounsfieldUnits(self, dicom):
+        data = dicom.pixel_array
+        correctedSlope = 1 if dicom.RescaleSlope < 1 else dicom.RescaleSlope
+        #correctedSlope = 1 if (dicom.RescaleSlope == 0) else dicom.RescaleSlope
+        data = (data * correctedSlope) + dicom.RescaleIntercept
+        return data
     
-    #takes anonymized file, opens dicom, takes minimal info
+    #takes anonymized file, opens dicom, takes minimal info, writes png
     #adds dicom to work queue, looks up mongo record, creates and rets URL
     def processImage(self, path, dicom):
         logger.info("START PROCESS IMAGE SERVICE")
@@ -40,7 +47,8 @@ class CovidAppServices:
 
         #TODO thread this
         #upload dicoms to azure
-        status = self.model.uploadDicomToBlob(accessCode, dicomInfo['imgName'], dicomData.pixel_array) #TODO  change key from accesscode
+        pixel_array = self.getHounsfieldUnits(dicomData)
+        status = self.model.uploadDicomToBlob(accessCode, dicomInfo['imgName'], pixel_array) #TODO  change key from accesscode
         if not status:
             resp = "Failed to upload Dicom to Blob"
             return resp
