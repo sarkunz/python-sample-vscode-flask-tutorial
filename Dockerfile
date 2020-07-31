@@ -34,7 +34,9 @@ RUN pip install --no-cache-dir -U pip
 
 #for opencv
 RUN apt-get update 
-RUN apt-get install -y libgtk2.0-dev libsm6 libxrender1 libxext6
+
 #RUN apt-get -y install libglib2.0-0 \ libsm6 \ libxrender-dev \ libxext6
 
 RUN pip install --no-cache-dir -r /requirements.txt
+
+RUN apt-get install -y libgtk2.0-dev libsm6 libxrender1 libxext6

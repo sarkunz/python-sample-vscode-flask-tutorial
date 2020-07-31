@@ -50,14 +50,3 @@ def fetchReport(accessCode): #GET
     info = CovidAppServices().getReportInfo(accessCode)
     return render_template("report.html", info=info)
 
-#PROBS NOT DOING THIS
-#inp: certificate, outp: auth token
-@app.route("/authenticate")
-def authenticate(): #GET
-    #read cert
-    #generate auth token
-    #save auth to db- assoc with study??
-
-    #POSSIBLY reroute to '/fetchReport/<authtoken>'
-    return "authenticate"
-
