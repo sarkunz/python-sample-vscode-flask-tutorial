@@ -1,7 +1,6 @@
 # services- business logic of API
 import datetime
 import pydicom
-#import cv2
 import os
 from .models import CovidAppModel
 import socket
@@ -49,15 +48,6 @@ class CovidAppServices:
 
         #FOR NOW USING STUDY ID- TODO CONVERT TO HASHMAP
         resp = dicomInfo['studyID'] #accessCode + " " + dicomInfo['studyID'] + "/" + dicomInfo['seriesID']
-
-        # #convert to png --moved to function
-        # #test_list = [ f for f in  os.listdir(inputdir)]
-        # # for f in test_list[:10]:   # remove "[:10]" to convert all images 
-        # #     ds = pydicom.read_file(inputdir + f) # read dicom image
-        # #     print(inputdir + f)
-        # #     img = ds.pixel_array # get image array
-        # #     print(img.dtype)
-        # #     cv2.imwrite(outdir + f.replace('.dcm','.png'),img) # write png image
 
         # print("END PROCESS SERVICE")
         hostname = socket.gethostname()    

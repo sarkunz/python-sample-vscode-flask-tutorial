@@ -6,7 +6,8 @@ MarkupSafe==1.0
 Werkzeug==0.15.5
 
 pydicom
-opencv-python
+scikit-image
+#opencv-python
 azure-storage-blob==12.3.2
 pillow
 pymongo

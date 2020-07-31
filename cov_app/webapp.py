@@ -5,3 +5,6 @@ from . import views  # For import side-effects of setting up routes.
 
 # Time-saver: output a URL to the VS Code terminal so you can easily Ctrl+click to open a browser
 # print('http://127.0.0.1:5000/hello/VSCode')
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=80)

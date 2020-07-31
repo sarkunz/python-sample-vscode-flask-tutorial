@@ -10,7 +10,8 @@ import base64
 from pymongo import MongoClient
 #from . import mongo
 import random
-import cv2
+#import cv2
+from skimage.io import imsave, imread
 import json
 import numpy as np
 
@@ -84,7 +85,11 @@ class CovidAppModel:
         
         #write array to png
         filename = filename.replace('.dcm','.png')
-        cv2.imwrite(filename,dicom.astype(np.uint16))
+        dicom = np.array(dicom)
+        dicom += 2000
+        dicom *= 10
+        imsave(filename, dicom.astype(np.uint16))
+        #cv2.imwrite(filename,dicom.astype(np.uint16))
         dcmFile = open(filename, "rb")
         print("wrote to png")
 
