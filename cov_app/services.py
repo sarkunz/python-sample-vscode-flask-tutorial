@@ -3,7 +3,6 @@ import datetime
 import pydicom
 import os
 from .models import CovidAppModel
-import socket
 
 import logging
 logger = logging.getLogger(__name__)
@@ -50,9 +49,7 @@ class CovidAppServices:
         resp = dicomInfo['studyID'] #accessCode + " " + dicomInfo['studyID'] + "/" + dicomInfo['seriesID']
 
         # print("END PROCESS SERVICE")
-        hostname = socket.gethostname()    
-        IPAddr = socket.gethostbyname(hostname)  
-        return 'http://' + str(IPAddr) + ':5000/fetchReport/' + resp
+        return 'http://covwebapp.azurewebsites.net/fetchReport/' + resp
 
     def isValidToken(self, token):
         #check for token in DB
