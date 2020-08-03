@@ -19,6 +19,7 @@ class CovidAppServices:
         correctedSlope = 1 if dicom.RescaleSlope < 1 else dicom.RescaleSlope
         #correctedSlope = 1 if (dicom.RescaleSlope == 0) else dicom.RescaleSlope
         data = (data * correctedSlope) + dicom.RescaleIntercept
+        data = np.clip(data,a_min=-2000,a_max=None)
         return data
     
     #takes anonymized file, opens dicom, takes minimal info, writes png
