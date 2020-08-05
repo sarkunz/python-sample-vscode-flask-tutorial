@@ -42,24 +42,28 @@ class CovidAppModel:
         entry = studies_coll.find_one({'studyID': dicomInfo['studyID']})
         if(entry):
             accessCode = entry['accessCode']
-            imCount = entry['imCount']
-        else:
-            imCount = 0
-            #create new accesscode
-            accessCode = dicomInfo['studyID'][-3:] + dicomInfo['seriesID'][-3:] + str(random.randint(1000, 9999)) #TODO only if this hasn't been set before
-        #add study instance UID, site code, series UID, SOP UID(?), count of imgs(?), last updated time
-        data = {'studyID': dicomInfo['studyID'], 
-                'seriesID' : dicomInfo['seriesID'],
-                'siteCode' : dicomInfo['siteCode'],
-                'studyDate' : dicomInfo['studyDate'],
-                'studyTime' : dicomInfo['studyTime'],
+            query = {'studyID': dicomInfo['studyID']}
+            data = {
                 'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
                 'lastUpdated' : datetime.now(),
-                'imCount': imCount + 1,
-                'accessCode' : accessCode,
+                'imCount': entry['imCount'] + 1
             }
-        query = {'studyID': dicomInfo['studyID']}
-        status = studies_coll.update(query, data, upsert=(not entry))
+            status = studies_coll.find_one_and_update(query, {'$set': data})
+        else:
+            #create new accesscode
+            accessCode = dicomInfo['studyID'][-3:] + dicomInfo['seriesID'][-3:] + str(random.randint(1000, 9999)) #TODO only if this hasn't been set before
+            #add study instance UID, site code, series UID, SOP UID(?), count of imgs(?), last updated time
+            data = {'studyID': dicomInfo['studyID'], 
+                    'seriesID' : dicomInfo['seriesID'],
+                    'siteCode' : dicomInfo['siteCode'],
+                    'studyDate' : dicomInfo['studyDate'],
+                    'studyTime' : dicomInfo['studyTime'],
+                    'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
+                    'lastUpdated' : datetime.now(),
+                    'imCount': 1,
+                    'accessCode' : accessCode,
+            }
+            status = studies_coll.insert_one(data)
         #TODO: check it worked and return status
         print("STATUS DB", status)
         status = True
@@ -97,9 +101,11 @@ class CovidAppModel:
         entry = studies_coll.find_one({'studyID': studyID})
         preds = self.getPreds(entry['accessCode'])
         overall = self.getOverallPred(preds)
-        exImages = entry['exampleImages'] if "exampleImages" in entry else []
-        print("example images", exImages)
-        
+
+        exImages = []
+        if "exampleImages" in entry:
+            exImages = entry['exampleImages'] if len(entry['exampleImages']) <=3 else entry['exampleImages'][0:3]
+
         ret = {'facility': entry['siteCode'],
                 'numImgs' : entry['imCount'],
                 'studyDate': entry['studyDate'],

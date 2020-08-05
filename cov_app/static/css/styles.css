@@ -53,10 +53,18 @@ table, th, td {
     width:100%;
 }
 
-.distrHorz {
+.spaceevenly {
     padding-top: 1em;
     width: 100%;
     display: flex; 
     flex-direction: row; 
-    justify-content: space-evenly
+    justify-content: space-evenly;
+}
+
+.spacebetween{
+    padding-top: 1em;
+    width: 100%;
+    display: flex; 
+    flex-direction: row; 
+    justify-content: space-between;
 }

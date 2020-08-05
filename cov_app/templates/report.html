@@ -9,18 +9,26 @@
 </head>
 
 <body>
-  <!--TODO: GET BRANDING HEADERS-->
   <title>Novarad COVIDAI Analysis</title>
-  <h1 class="center"> NOVARAD COVIDAI ANALYSIS</h1>
-  
+  <div class="spacebetween">
+    <div><img src="{{ url_for('static', filename='images/novlogo.svg') }}" alt="NOVARAD" style="width:100px"></div>
+    <div><img src = "{{ url_for('static', filename='images/ailogo.svg') }}" alt="NOVARAD COVIDAI ANALYSIS" style="width:250px"></div>
+    <div><img src="{{ url_for('static', filename='images/microsoftlogo.png') }}" alt="Microsoft" style="width:100px"></div>
+  </div>
+    
   {% if info %}
-      <h2 class="left"> Study Code: {{info.accessCode}} </h2>
-      <p class="left">Images Recieved: {{info.numImgs}}</p>
-      <div class="right">
-        <h2>{{ info.facility }}</h2>
-        <p>Test Date: {{info.studyDate}}</p>
-        <!--p>Test Time: {{info.studyTime}}</p-->
+      <div class="spacebetween">
+        <div>
+          <h2> Study Code: {{info.accessCode}} </h2>
+          <p>Images Recieved: {{info.numImgs}}</p>
+        </div>      
+        <div>
+          <h2>{{ info.facility }}</h2>
+          <p>Test Date: {{info.studyDate}}</p>
+          <p>Test Time: {{info.studyTime}}</p>
+        </div>
       </div>
+      
 
       <div class="left">
         <h1>Diagnosis</h1>
@@ -32,8 +40,7 @@
       <div class="left"">
         <h1>Detailed Summary</h1>
         <p>Examples of ground glass particulates are found in the following images</p>
-        <!--TODO: IMAGES-->
-        <div class="distrHorz">
+        <div class="spaceevenly">
         {% for url in info.imageUrls %}
             <div>
               <a href="{{url}}" target="_blank">
