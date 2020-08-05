@@ -29,22 +29,19 @@
         <p>Percent of CT showing ground glass particulates: {{info.percShown}}</p>
       </div>
 
-      <div class="left">
+      <div class="left"">
         <h1>Detailed Summary</h1>
-        <p>Ground glass particulates found in the following images</p>
+        <p>Examples of ground glass particulates are found in the following images</p>
         <!--TODO: IMAGES-->
-        <table>
-          <tr>
-            <td>1-3</td>
-            <td>120-145</td>
-            <td>150-158</td>
-          </tr>
-          <tr>
-            <td>IMG1</td>
-            <td>IMG2</td>
-            <td>IMG3</td>
-          </tr>
-        </table>
+        <div class="distrHorz">
+        {% for url in info.imageUrls %}
+            <div>
+              <a href="{{url}}" target="_blank">
+                <img src="{{url}}" style="width:150px" alt="Scan Image">
+              </a>
+            </div>
+        {% endfor %}
+        </div>
       </div>
 
       <div class="left">

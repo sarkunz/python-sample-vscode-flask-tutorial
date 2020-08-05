@@ -3,9 +3,7 @@ import datetime
 import pydicom
 import os
 from .models import CovidAppModel
-
-import logging
-logger = logging.getLogger(__name__)
+import numpy as np
 
 class CovidAppServices:
     def __init__(self):
@@ -21,21 +19,25 @@ class CovidAppServices:
         data = (data * correctedSlope) + dicom.RescaleIntercept
         data = np.clip(data,a_min=-2000,a_max=None)
         return data
+
+    #yyyymmdd -> yyyy-mm-dd
+    def formatDate(self, date):
+        return date[:4] + "-" + date[4:6] + "-" + date[6:8]
+
+    #hhmmss -> hh:mm:ss
+    def formatTime(self, time):
+        return time[:2] + ":" + time[2:4] + ":" + time[4:6]
     
     #takes anonymized file, opens dicom, takes minimal info, writes png
     #adds dicom to work queue, looks up mongo record, creates and rets URL
-    def processImage(self, path, dicom):
-        logger.info("START PROCESS IMAGE SERVICE")
-        
-        outp = "static\\images\\pngs\\"
-        outdir = os.path.join(path, outp)
-        
+    def processImage(self, path, dicom):                
         print("processing dicom")
         dicomData = pydicom.dcmread(dicom, force=True)
         dicomInfo = {'studyID' :dicomData.StudyInstanceUID, 
                         'seriesID' : dicomData.SeriesInstanceUID,
-                        'siteCode' : 'UI-RAI', #TODO how are we getting this?
-                        'studyDate' : dicomData.StudyDate,
+                        'siteCode' : dicomData.InstitutionName, #TODO how are we getting this?
+                        'studyDate' : self.formatDate(str(dicomData.StudyDate)),
+                        'studyTime' : self.formatTime(str(dicomData.StudyTime)),
                         'SOPID' : dicomData.SOPClassUID,
                         'imgName' : str(dicom.filename)
                     }
@@ -60,10 +62,19 @@ class CovidAppServices:
         # print("END PROCESS SERVICE")
         return 'http://covwebapp.azurewebsites.net/fetchReport/' + resp
 
-    def isValidToken(self, token):
-        #check for token in DB
-        return True
+
+    # using generate_container_sas
+    #returns container_sas_token, account_name, container_name
+    def getSasToken(self):
+        return self.model.getSasToken()
 
     def getReportInfo(self, studyID):
+        print("get report info")
         info = self.model.getImageInfo(studyID)
+        if(len(info['exampleImages'])):
+            print("getting imageurls")
+            info['imageUrls'] = []
+            container_sas_token, account_name, container_name = self.getSasToken()
+            for im_name in info['exampleImages']:
+                info['imageUrls'].append(f"https://{account_name}.blob.core.windows.net/{container_name}/{im_name}?{container_sas_token}")
         return info

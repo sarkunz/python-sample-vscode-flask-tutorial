@@ -1,9 +1,7 @@
 # models- all db interactions
-import datetime
-#from azure.storage.queue import QueueService
-#from azure.storage.blob import BlockBlobService, PublicAcces
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
-
+from datetime import datetime, timedelta
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, generate_container_sas, ContainerSasPermissions
+generate_container_sas, ContainerSasPermissions
 import os
 import pydicom
 import base64
@@ -15,29 +13,30 @@ from skimage.io import imsave, imread
 import json
 import numpy as np
 
-import logging
-logger = logging.getLogger(__name__)
-
 class CovidAppModel:
-    def __init__(self):
-        #connect to 
-        
-        #get queue
-        account_name = 'jaredtutorial9277385973'
-        account_key = 'qgtyoU/MxAMqCMd6QbjQ7E+SMu+rqi2ynhJfcf6/rU5BdOrdlIq4j5QM6UN59vkI9wLEL7tAkQ1LDCW4mL6L+A=='
-        # self.queue = QueueService(account_name=account_name, account_key=account_key)
-        # self.queue_name = "covidqueue"
+    def __init__(self):       
+        self.account_name = 'storageaccountdevus81b4'
+        self.account_key = 'wqhKaJKWMItAW3EnCj9fN4RWD2VzpLAw1yykhvS2e2uvWrYOez1bXMsLizgPQRbmaYOEo+0oQtIlaDW2wuer9A=='
 
         #get storage blob client
-        connect_str = 'DefaultEndpointsProtocol=https;AccountName=jaredtutorial9277385973;AccountKey=qgtyoU/MxAMqCMd6QbjQ7E+SMu+rqi2ynhJfcf6/rU5BdOrdlIq4j5QM6UN59vkI9wLEL7tAkQ1LDCW4mL6L+A==;EndpointSuffix=core.windows.net'
+        #OLD jaredtutorial connect str #self.connect_str = 'DefaultEndpointsProtocol=https;AccountName=jaredtutorial9277385973;AccountKey=qgtyoU/MxAMqCMd6QbjQ7E+SMu+rqi2ynhJfcf6/rU5BdOrdlIq4j5QM6UN59vkI9wLEL7tAkQ1LDCW4mL6L+A==;EndpointSuffix=core.windows.net'
+        connect_str = 'DefaultEndpointsProtocol=https;AccountName=storageaccountdevus81b4;AccountKey=wqhKaJKWMItAW3EnCj9fN4RWD2VzpLAw1yykhvS2e2uvWrYOez1bXMsLizgPQRbmaYOEo+0oQtIlaDW2wuer9A==;EndpointSuffix=core.windows.net'
         self.blob_service_client = BlobServiceClient.from_connection_string(connect_str)
         self.container_name = 'webappimgs'
-        #self.block_blob_service = BlockBlobService(account_name=account_name, account_key=account_key)
 
         self.mongoCli = MongoClient('mongodb+srv://skunzler:sarah96@cluster0.22wsg.azure.mongodb.net/<dbname>?retryWrites=true&w=majority')
 
+    def getSasToken(self):
+        container_sas_token = generate_container_sas(
+            account_name=self.account_name,
+            container_name=self.container_name,
+            account_key=self.account_key,
+            permission=ContainerSasPermissions(read=True),
+            expiry=datetime.utcnow() + timedelta(hours=1)
+        )
+        return container_sas_token, self.account_name, self.container_name
+
     def createDbEntry(self, dicomInfo):
-        logger.info("MODEL CREATE DB ENTRY")
         studies_coll = self.mongoCli.db.studies
         #check for study & series ID (id)
         entry = studies_coll.find_one({'studyID': dicomInfo['studyID']})
@@ -50,34 +49,21 @@ class CovidAppModel:
             accessCode = dicomInfo['studyID'][-3:] + dicomInfo['seriesID'][-3:] + str(random.randint(1000, 9999)) #TODO only if this hasn't been set before
         #add study instance UID, site code, series UID, SOP UID(?), count of imgs(?), last updated time
         data = {'studyID': dicomInfo['studyID'], 
-                    'seriesID' : dicomInfo['seriesID'],
-                    'siteCode' : dicomInfo['siteCode'],
-                    'studyDate' : dicomInfo['studyDate'],
-                    'SOPID' : dicomInfo['SOPID'],
-                    'lastUpdated' : datetime.datetime.now(),
-                    'imCount': imCount + 1,
-                    'accessCode' : accessCode,
-                }
+                'seriesID' : dicomInfo['seriesID'],
+                'siteCode' : dicomInfo['siteCode'],
+                'studyDate' : dicomInfo['studyDate'],
+                'studyTime' : dicomInfo['studyTime'],
+                'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
+                'lastUpdated' : datetime.now(),
+                'imCount': imCount + 1,
+                'accessCode' : accessCode,
+            }
         query = {'studyID': dicomInfo['studyID']}
-        imgData = { 
-                    '$push': {
-                        "imgNames": dicomInfo['imgName']
-                    }
-                }
-        status = studies_coll.update(query, data, upsert=True)
-        status = studies_coll.update(query, imgData) #TODO combine into one update. Not totally working
+        status = studies_coll.update(query, data, upsert=(not entry))
         #TODO: check it worked and return status
         print("STATUS DB", status)
         status = True
         return status, accessCode
-    
-    def addToQueue(self, message):
-        pass
-        # message_bytes = message.encode('ascii')
-        # base64_bytes = base64.b64encode(message_bytes)
-        # print("64 TYPE: ", base64_bytes.dtype)
-        # self.queue.put_message(self.queue_name, base64_bytes)
-        # #base64_message = base64_bytes.decode('ascii')
 
     def uploadDicomToBlob(self, key, filename, dicom):        
         #TODO do this in a thread
@@ -91,7 +77,6 @@ class CovidAppModel:
         imsave(filename, dicom.astype(np.uint16))
         #cv2.imwrite(filename,dicom.astype(np.uint16))
         dcmFile = open(filename, "rb")
-        print("wrote to png")
 
         blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=key + '/' + filename) #key/txdDoc.txt
         blob_client.upload_blob(dcmFile, overwrite=True) 
@@ -112,16 +97,20 @@ class CovidAppModel:
         entry = studies_coll.find_one({'studyID': studyID})
         preds = self.getPreds(entry['accessCode'])
         overall = self.getOverallPred(preds)
-
+        exImages = entry['exampleImages'] if "exampleImages" in entry else []
+        print("example images", exImages)
+        
         ret = {'facility': entry['siteCode'],
                 'numImgs' : entry['imCount'],
-                'studyDate': entry['studyDate'],#entry.studyDate,
+                'studyDate': entry['studyDate'],
+                'studyTime' : entry['studyTime'],
                 'accessCode': entry['accessCode'],
+                'exampleImages': exImages,
                 'overall' : overall,
                 'pred': '91%',
                 'percShown': '5%',
                 'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
-                'availUntil' : '08/06/2020'
+                'availUntil' : '08/12/2020' #TODO how are we going to delete these?
          }# studytime, pred(iction), percShown, overall, runIndxs, photos, recommendation
 
         return ret
@@ -193,7 +182,3 @@ class CovidAppModel:
 
     def get(self, params):
         return -1
-
-#get info for study
-
-#add dicom img to db
