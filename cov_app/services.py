@@ -60,7 +60,7 @@ class CovidAppServices:
         resp = dicomInfo['studyID'] #accessCode + " " + dicomInfo['studyID'] + "/" + dicomInfo['seriesID']
 
         # print("END PROCESS SERVICE")
-        return 'http://covwebapp.azurewebsites.net/fetchReport/' + resp
+        return 'https://covwebapp.azurewebsites.net/fetchReport/' + resp
 
 
     # using generate_container_sas

@@ -76,7 +76,7 @@ class CovidAppModel:
         
         #write array to png
         #filename = filename.replace('.dcm','.png')
-        filename = filename.replace('.raw','.png')
+        filename = filename +'.png' #TODO: not sure what extension this will be. just append png probs
         dicom = np.array(dicom)
         dicom += 2000
         dicom *= 10
