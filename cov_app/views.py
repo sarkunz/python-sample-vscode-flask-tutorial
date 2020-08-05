@@ -36,5 +36,8 @@ def fetchReport(accessCode): #GET
     print("fetch image")
     #accessCode = #request.data["accessCode"]
     info = CovidAppServices().getReportInfo(accessCode)
-    return render_template("report.html", info=info)
+    processed = True
+    if(info == -1):
+        processed = False
+    return render_template("report.html", info=info, processed=processed)
 

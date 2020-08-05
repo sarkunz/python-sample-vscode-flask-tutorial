@@ -71,6 +71,8 @@ class CovidAppServices:
     def getReportInfo(self, studyID):
         print("get report info")
         info = self.model.getImageInfo(studyID)
+        if(info == -1):
+            return -1
         if(len(info['exampleImages'])):
             print("getting imageurls")
             info['imageUrls'] = []

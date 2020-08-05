@@ -12,6 +12,7 @@ import random
 from skimage.io import imsave, imread
 import json
 import numpy as np
+import math
 
 class CovidAppModel:
     def __init__(self):       
@@ -99,12 +100,21 @@ class CovidAppModel:
         print("getting img info")
         studies_coll = self.mongoCli.db.studies
         entry = studies_coll.find_one({'studyID': studyID})
+
+        #don't bother getting preds if we don't have many images
+        if entry['imCount'] < 10: #TODO change to account for last uploaded time
+            return -1
+
         preds = self.getPreds(entry['accessCode'])
-        overall = self.getOverallPred(preds)
+        overall, covCount, conf = self.getOverallPred(preds)
 
         exImages = []
         if "exampleImages" in entry:
-            exImages = entry['exampleImages'] if len(entry['exampleImages']) <=3 else entry['exampleImages'][0:3]
+            exImages = entry['exampleImages']
+            numIms = len(entry['exampleImages'])
+            if numIms > 3:
+                half = math.floor(numIms / 2)
+                exImages = entry['exampleImages'][half : half+3]
 
         ret = {'facility': entry['siteCode'],
                 'numImgs' : entry['imCount'],
@@ -113,39 +123,44 @@ class CovidAppModel:
                 'accessCode': entry['accessCode'],
                 'exampleImages': exImages,
                 'overall' : overall,
-                'pred': '91%',
-                'percShown': '5%',
+                'pred': conf,
+                'percShown': str(math.floor(covCount/entry['imCount'] * 10)) + "%",
                 'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
                 'availUntil' : '08/12/2020' #TODO how are we going to delete these?
          }# studytime, pred(iction), percShown, overall, runIndxs, photos, recommendation
-
+        
         return ret
 
     def getOverallPred(self, data):
         mean = np.mean(data)
         outp = "NO"
+        conf = "50%"
+        covCount = 0
         tr = np.array(data) #.transpose()
         ####indet
         #if norm area > 0.45
-        if mean > 0.45:
+        if mean > 0.35:
             outp = "INDETERMINATE"
         
-        #if 2+ models pred 0.75+ on 3+ imgs
+        #if 2+ models pred 0.75+ on 2+ imgs
         colct = np.array([len(np.where(row > 0.75)[0]) for row in tr])
         rowct = len(colct[colct >= 2])
-        if(rowct >= 3):
+        if(rowct >= 2):
             outp = "INDETERMINATE"
+            covCount = rowct
 
         ######yes
         #if norm area > 0.65
-        if mean > 0.65:
+        if mean > 0.55:
             outp = "YES"
+            conf = "95%"
 
         #if 2+ models pred 0.90+ on 2+ imgs
         colct = np.array([len(np.where(row > 0.90)[0]) for row in tr])
         rowct = len(colct[colct >= 2])
         if(rowct >= 2):
             outp = "YES"
+            conf = "95%"
 
         # #if 2+ models pred 0.98+ on 2+ imgs
         # colct = np.array([len(np.where(row > 0.98)[0]) for row in tr])
@@ -154,7 +169,7 @@ class CovidAppModel:
         #     outp = "yes"
 
         ###else outp is no
-        return outp
+        return outp, covCount, conf
 
     #uses accessCode to get azure blob with predictions and return numpy array of preds (unsorted)
     def getPreds(self, accessCode):

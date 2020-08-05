@@ -16,7 +16,7 @@
     <div><img src="{{ url_for('static', filename='images/microsoftlogo.png') }}" alt="Microsoft" style="width:100px"></div>
   </div>
     
-  {% if info %}
+  {% if processed %}
       <div class="spacebetween">
         <div>
           <h2> Study Code: {{info.accessCode}} </h2>
@@ -33,13 +33,17 @@
       <div class="left">
         <h1>Diagnosis</h1>
         <p>Ground glass particulates consistent with COVID19 present: {{info.overall}}</p>
-        <p>Confidence level: {{info.pred}}</p>
+        <p>Confidence level: {{info.pred}}</p>  
         <p>Percent of CT showing ground glass particulates: {{info.percShown}}</p>
       </div>
 
       <div class="left"">
         <h1>Detailed Summary</h1>
-        <p>Examples of ground glass particulates are found in the following images</p>
+        {% if info.overall == "NO" %}
+          <p>Representative lung images:</p>
+        {% else %}
+          <p>Examples of ground glass particulates are found in the following images:</p>
+        {% endif %}
         <div class="spaceevenly">
         {% for url in info.imageUrls %}
             <div>
@@ -59,7 +63,7 @@
       <div class="left">
         <p style="margin-top:2em">Report available until: {{info.availUntil}}</p>
       </div>
-      {% else %}
+  {% else %}
     <h2>Data has not yet been processed. Please reload or check back soon.</h2>
   {% endif %}
 </body>
