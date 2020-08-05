@@ -19,8 +19,8 @@ def processImage(): #POST
         
         #print(dicomImage)
         dicomImage = request.files["dicom"]
-        if(dicomImage.filename.find('.dcm') == -1):
-            return "Invalid upload file type"
+        # if(dicomImage.filename.find('.dcm') == -1):
+        #     return "Invalid upload file type"
         print("PROCESSING", dicomImage.filename)
         path = app.root_path
         result = services.processImage(path, dicomImage)
