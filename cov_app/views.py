@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Flask, render_template, request
 from . import app
 from .services import CovidAppServices
+import logging
 
 #To delete
 @app.route("/")
@@ -21,7 +22,8 @@ def processImage(): #POST
         dicomImage = request.files["dicom"]
         # if(dicomImage.filename.find('.dcm') == -1):
         #     return "Invalid upload file type"
-        print("PROCESSING", dicomImage.filename)
+        print(dicomImage.filename)
+        logging.info("PROCESSING" + dicomImage.filename)
         path = app.root_path
         result = services.processImage(path, dicomImage)
 
