@@ -16,7 +16,7 @@
     <div><img src="{{ url_for('static', filename='images/microsoftlogo.png') }}" alt="Microsoft" style="width:100px"></div>
   </div>
     
-  {% if processed %}
+  {% if status == "FINISHED" %}
       <div class="spacebetween">
         <div>
           <h2>Case Number: {{info.accessCode}} </h2>
@@ -70,7 +70,9 @@
           those cosidered Normal. The models have also been trained to week out other forms of pneumonia. The total images run through the
           algorithm is 13000 images. The current Specificity is 96% and the current sensitivity is 98% with an overall accuracy of 98%.</p>
       </div>
-  {% else %}
+  {% elif status == "UNFINISHED" %}
     <h2 class="center">Data has not yet been processed. Please reload or check back soon.</h2>
+  {% elif status == "EXPIRED" %}
+    <h2 class="center">No data found for this study, entry may have expired.</h2>
   {% endif %}
 </body>

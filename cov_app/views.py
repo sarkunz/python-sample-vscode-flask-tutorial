@@ -29,17 +29,17 @@ def processImage(): #POST
 
     else:
         result = "Novarad Home Page"
-    return result #result #accessCode
+    return result #url for fetchReport
 
 #fetches report (HTML)
 #inp: access code, outp: html
 @app.route("/fetchReport/<uid>")
 def fetchReport(uid): #GET
     print("fetch image")
-    #accessCode = #request.data["accessCode"]
+#accessCode = #request.data["accessCode"]
     info = CovidAppServices().getReportInfo(uid)
-    processed = True
-    if(info == -1):
-        processed = False
-    return render_template("report.html", info=info, processed=processed)
+    status = "FINISHED"
+    if isinstance(info, str): #if info == "EXPIRED" || "UNFINISHED"
+        status = info
+    return render_template("report.html", info=info, status=status)
 

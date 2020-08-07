@@ -66,8 +66,9 @@ class CovidAppModel:
                     'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
                     'lastUpdated' : datetime.now(),
                     'imCount': 1,
+                    'numProcessed' : 0,
                     'accessCode' : accessCode,
-                    'topImages': [{"0":""},{"0":""},{"0":""}]
+                    'topImages': [{"pred": 0, "im":""},{"pred": 0, "im":""},{"pred": 0, "im":""}]
             }
             status = studies_coll.insert_one(data)
         #TODO: check it worked and return status
@@ -110,32 +111,30 @@ class CovidAppModel:
         #if not valid study 
         if not entry:
             logging.error("No study in db")
-            return -1
+            return "EXPIRED"
 
         #don't bother getting preds if we don't have many images
-        if entry['imCount'] < 10: #TODO change to account for last uploaded time
-            return -1
+        if entry['numProcessed'] < 10: #TODO change to account for last uploaded time
+            return "UNFINISHED"
 
         preds = self.getPreds(entry['accessCode'])
         overall, covCount, conf = self.getOverallPred(preds)
 
         exImages = []
-        if "exampleImages" in entry:
-            exImages = entry['exampleImages']
-            numIms = len(entry['exampleImages'])
-            if numIms > 3:
-                half = math.floor(numIms / 2)
-                exImages = entry['exampleImages'][half : half+3]
+        if "topImages" in entry:
+            exImages = [i.get("im") for i in entry['topImages']]
+        print("topimages", exImages)          
 
         ret = {'facility': entry['siteCode'],
                 'numImgs' : entry['imCount'],
+                'numProcessed' : entry['numProcessed'],
                 'studyDate': entry['studyDate'],
                 'studyTime' : entry['studyTime'],
                 'accessCode': entry['accessCode'],
                 'exampleImages': exImages,
                 'overall' : overall,
                 'pred': conf,
-                'percShown': str(math.floor(covCount/entry['imCount'] * 10)) + "%",
+                'percShown': str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
                 'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
                 'availUntil' : '08/12/2020' #TODO how are we going to delete these?
          }# studytime, pred(iction), percShown, overall, runIndxs, photos, recommendation
