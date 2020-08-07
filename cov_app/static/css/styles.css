@@ -68,3 +68,7 @@ table, th, td {
     flex-direction: row; 
     justify-content: space-between;
 }
+
+.xsmallFont{
+    font-size: x-small;
+}

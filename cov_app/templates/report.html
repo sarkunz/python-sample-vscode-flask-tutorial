@@ -32,9 +32,9 @@
 
       <div class="left">
         <h1>Diagnosis</h1>
-        <p>Ground glass particulates consistent with COVID19 present: {{info.overall}}</p>
+        <p>Diagnostic finding consistent with COVID-19 present: {{info.overall}}</p>
         <p>Confidence level: {{info.pred}}</p>  
-        <p>Percent of CT showing ground glass particulates: {{info.percShown}}</p>
+        <p>Percent of CT showing evidence of COVID-19: {{info.percShown}}</p>
       </div>
 
       <div class="left"">
@@ -42,7 +42,7 @@
         {% if info.overall == "NO" %}
           <p>Representative lung images:</p>
         {% else %}
-          <p>Examples of ground glass particulates are found in the following images:</p>
+          <p>Evidence of COVID-19 found in the following images:</p>
         {% endif %}
         <div class="spaceevenly">
         {% for url in info.imageUrls %}
@@ -62,6 +62,13 @@
 
       <div class="left">
         <p style="margin-top:2em">Report available until: {{info.availUntil}}</p>
+      </div>
+
+      <div class="left">
+        <p class="xsmallFont">Disclaimer: Novarad's COVID AI runs five consecutive models on each study to better ensure accuracy and reduces
+          the chance of false negatives. Currently, the models have been trained on 46 CT scans of both patients with confirmed COVID and
+          those cosidered Normal. The models have also been trained to week out other forms of pneumonia. The total images run through the
+          algorithm is 13000 images. The current Specificity is 96% and the current sensitivity is 98% with an overall accuracy of 98%.</p>
       </div>
   {% else %}
     <h2>Data has not yet been processed. Please reload or check back soon.</h2>
