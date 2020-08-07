@@ -33,11 +33,11 @@ def processImage(): #POST
 
 #fetches report (HTML)
 #inp: access code, outp: html
-@app.route("/fetchReport/<accessCode>")
-def fetchReport(accessCode): #GET
+@app.route("/fetchReport/<uid>")
+def fetchReport(uid): #GET
     print("fetch image")
     #accessCode = #request.data["accessCode"]
-    info = CovidAppServices().getReportInfo(accessCode)
+    info = CovidAppServices().getReportInfo(uid)
     processed = True
     if(info == -1):
         processed = False

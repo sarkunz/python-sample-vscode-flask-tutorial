@@ -13,6 +13,8 @@ from skimage.io import imsave, imread
 import json
 import numpy as np
 import math
+import uuid
+import logging
 
 class CovidAppModel:
     def __init__(self):       
@@ -42,7 +44,7 @@ class CovidAppModel:
         #check for study & series ID (id)
         entry = studies_coll.find_one({'studyID': dicomInfo['studyID']})
         if(entry):
-            accessCode = entry['accessCode']
+            uid = entry['uid']
             query = {'studyID': dicomInfo['studyID']}
             data = {
                 'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
@@ -52,23 +54,26 @@ class CovidAppModel:
             status = studies_coll.find_one_and_update(query, {'$set': data})
         else:
             #create new accesscode
-            accessCode = dicomInfo['studyID'][-3:] + dicomInfo['seriesID'][-3:] + str(random.randint(1000, 9999)) #TODO only if this hasn't been set before
+            accessCode = str(int(dicomInfo['studyID'][-3:]) * int(dicomInfo['seriesID'][-3:]) * 23)# str(random.randint(1000, 9999)) #TODO only if this hasn't been set before
+            uid = str(uuid.uuid1())
             #add study instance UID, site code, series UID, SOP UID(?), count of imgs(?), last updated time
             data = {'studyID': dicomInfo['studyID'], 
                     'seriesID' : dicomInfo['seriesID'],
                     'siteCode' : dicomInfo['siteCode'],
+                    'uid' : uid,
                     'studyDate' : dicomInfo['studyDate'],
                     'studyTime' : dicomInfo['studyTime'],
                     'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
                     'lastUpdated' : datetime.now(),
                     'imCount': 1,
                     'accessCode' : accessCode,
+                    'topImages': [{"0":""},{"0":""},{"0":""}]
             }
             status = studies_coll.insert_one(data)
         #TODO: check it worked and return status
         print("STATUS DB", status)
         status = True
-        return status, accessCode
+        return status, uid #TODO change to uid
 
     def uploadDicomToBlob(self, key, filename, dicom):        
         #TODO do this in a thread
@@ -96,11 +101,16 @@ class CovidAppModel:
         #TODO: if error return False
         return True
 
-    def getImageInfo(self, studyID):
+    def getImageInfo(self, uid):
         #facility, studydate, studytime, pred(iction), percShown, overall, runIndxs, photos, recommendation
-        print("getting img info")
+        print("getting img info", uid)
         studies_coll = self.mongoCli.db.studies
-        entry = studies_coll.find_one({'studyID': studyID})
+        entry = studies_coll.find_one({'uid': uid})
+
+        #if not valid study 
+        if not entry:
+            logging.error("No study in db")
+            return -1
 
         #don't bother getting preds if we don't have many images
         if entry['imCount'] < 10: #TODO change to account for last uploaded time

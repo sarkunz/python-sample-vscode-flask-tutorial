@@ -8,9 +8,6 @@ import numpy as np
 class CovidAppServices:
     def __init__(self):
         self.model = CovidAppModel()
-    
-    def create(self, params):
-        self.model.create(params)
 
     def getHounsfieldUnits(self, dicom):
         data = dicom.pixel_array
@@ -43,7 +40,7 @@ class CovidAppServices:
                     }
         
         #add dicom info to db
-        status, accessCode = self.model.createDbEntry(dicomInfo)
+        status, uid = self.model.createDbEntry(dicomInfo)
         if not status:
             resp = "Failed to create DB entry."
             return resp
@@ -51,16 +48,13 @@ class CovidAppServices:
         #TODO thread this
         #upload dicoms to azure
         pixel_array = self.getHounsfieldUnits(dicomData)
-        status = self.model.uploadDicomToBlob(accessCode, dicomInfo['imgName'], pixel_array) #TODO  change key from accesscode
+        status = self.model.uploadDicomToBlob(uid, dicomInfo['imgName'], pixel_array) #TODO  change key from accesscode
         if not status:
             resp = "Failed to upload Dicom to Blob"
             return resp
 
-        #FOR NOW USING STUDY ID- TODO CONVERT TO HASHMAP
-        resp = dicomInfo['studyID'] #accessCode + " " + dicomInfo['studyID'] + "/" + dicomInfo['seriesID']
-
         # print("END PROCESS SERVICE")
-        return 'https://covwebapp.azurewebsites.net/fetchReport/' + resp
+        return 'https://covwebapp.azurewebsites.net/fetchReport/' + uid
 
 
     # using generate_container_sas
