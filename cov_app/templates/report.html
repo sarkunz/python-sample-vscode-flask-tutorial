@@ -19,7 +19,7 @@
   {% if processed %}
       <div class="spacebetween">
         <div>
-          <h2> Study Code: {{info.accessCode}} </h2>
+          <h2>Case Number: {{info.accessCode}} </h2>
           <p>Images Recieved: {{info.numImgs}}</p>
         </div>      
         <div>
@@ -71,6 +71,6 @@
           algorithm is 13000 images. The current Specificity is 96% and the current sensitivity is 98% with an overall accuracy of 98%.</p>
       </div>
   {% else %}
-    <h2>Data has not yet been processed. Please reload or check back soon.</h2>
+    <h2 class="center">Data has not yet been processed. Please reload or check back soon.</h2>
   {% endif %}
 </body>
