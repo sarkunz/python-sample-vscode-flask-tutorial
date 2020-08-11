@@ -126,7 +126,7 @@ class CovidAppModel:
         if entry['numProcessed'] < 10: #TODO factor in last update time (30mins-hr?)
             return "UNFINISHED"
 
-        preds = self.getPreds(entry['accessCode'])
+        preds = self.getPreds(entry['uid'])
         overall, covCount, conf = self.getOverallPred(preds)
 
         exImages = []
