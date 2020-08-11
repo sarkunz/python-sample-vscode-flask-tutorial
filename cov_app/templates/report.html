@@ -12,13 +12,16 @@
   <title>Novarad COVIDAI Analysis</title>
   <div class="spacebetween">
     <div><img src="{{ url_for('static', filename='images/novlogo.svg') }}" alt="NOVARAD" style="width:100px"></div>
-    <div><img src = "{{ url_for('static', filename='images/ailogo.svg') }}" alt="NOVARAD COVIDAI ANALYSIS" style="width:250px"></div>
+    <div>
+      <img src = "{{ url_for('static', filename='images/ailogo.svg') }}" alt="NOVARAD COVIDAI ANALYSIS" style="width:250px">
+      <h2>Covid-19 AI Diagnostic Assistant</h2>
+    </div>
     <div><img src="{{ url_for('static', filename='images/microsoftlogo.png') }}" alt="Microsoft" style="width:100px"></div>
   </div>
     
   {% if status == "FINISHED" %}
       <div class="spacebetween">
-        <div>
+        <div class="flexVert">
           <h2>Case Number: {{info.accessCode}} </h2>
           <p>Images Recieved: {{info.numImgs}}</p>
         </div>      
@@ -28,7 +31,6 @@
           <p>Test Time: {{info.studyTime}}</p>
         </div>
       </div>
-      
 
       <div class="left">
         <h1>Diagnosis</h1>
@@ -60,9 +62,9 @@
         <p>{{info.recommendation}}</p>
       </div>
 
-      <div class="left">
+      <!--div class="left">
         <p style="margin-top:2em">Report available until: {{info.availUntil}}</p>
-      </div>
+      </div-->
 
       <div class="left">
         <p class="xsmallFont">Disclaimer: Novarad's COVID AI runs five consecutive models on each study to better ensure accuracy and reduces
@@ -70,9 +72,12 @@
           those cosidered Normal. The models have also been trained to week out other forms of pneumonia. The total images run through the
           algorithm is 13000 images. The current Specificity is 96% and the current sensitivity is 98% with an overall accuracy of 98%.</p>
       </div>
+
   {% elif status == "UNFINISHED" %}
     <h2 class="center">Data has not yet been processed. Please reload or check back soon.</h2>
+ 
   {% elif status == "EXPIRED" %}
     <h2 class="center">No data found for this study, entry may have expired.</h2>
+ 
   {% endif %}
 </body>
