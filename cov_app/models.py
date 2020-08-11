@@ -48,12 +48,14 @@ class CovidAppModel:
             query = {'studyID': dicomInfo['studyID']}
             data = {
                 'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
-                'lastUpdated' : datetime.now(),
-                'imCount': entry['imCount'] + 1
+                'lastUpdated' : datetime.utcnow(),
+                'imCount': entry['imCount'] + 1,
+                'createdTime' : datetime.utcnow()
             }
             status = studies_coll.find_one_and_update(query, {'$set': data})
         else:
             #create new accesscode
+            #TODO always 8 chars- zero pad
             accessCode = str(int(dicomInfo['studyID'][-3:]) * int(dicomInfo['seriesID'][-3:]) * 23)# str(random.randint(1000, 9999)) #TODO only if this hasn't been set before
             uid = str(uuid.uuid1())
             #add study instance UID, site code, series UID, SOP UID(?), count of imgs(?), last updated time
@@ -63,8 +65,8 @@ class CovidAppModel:
                     'uid' : uid,
                     'studyDate' : dicomInfo['studyDate'],
                     'studyTime' : dicomInfo['studyTime'],
-                    'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
-                    'lastUpdated' : datetime.now(),
+                    'SOPID' : dicomInfo['SOPID'],
+                    'lastUpdated' : datetime.utcnow(),
                     'imCount': 1,
                     'numProcessed' : 0,
                     'accessCode' : accessCode,
@@ -74,7 +76,7 @@ class CovidAppModel:
         #TODO: check it worked and return status
         print("STATUS DB", status)
         status = True
-        return status, uid #TODO change to uid
+        return status, uid
 
     def uploadDicomToBlob(self, key, filename, dicom):        
         #TODO do this in a thread
@@ -109,12 +111,13 @@ class CovidAppModel:
         entry = studies_coll.find_one({'uid': uid})
 
         #if not valid study 
+        #TODO check that there are images- not just no db entry
         if not entry:
             logging.error("No study in db")
             return "EXPIRED"
 
         #don't bother getting preds if we don't have many images
-        if entry['numProcessed'] < 10: #TODO change to account for last uploaded time
+        if entry['numProcessed'] < 10: #TODO factor in last update time (30mins-hr?)
             return "UNFINISHED"
 
         preds = self.getPreds(entry['accessCode'])

@@ -43,9 +43,9 @@ class CovidAppServices:
         status, uid = self.model.createDbEntry(dicomInfo)
         if not status:
             resp = "Failed to create DB entry."
+            #TODO set http response -on any error
             return resp
 
-        #TODO thread this
         #upload dicoms to azure
         pixel_array = self.getHounsfieldUnits(dicomData)
         status = self.model.uploadDicomToBlob(uid, dicomInfo['imgName'], pixel_array) #TODO  change key from accesscode
