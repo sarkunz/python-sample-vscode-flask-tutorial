@@ -83,8 +83,14 @@ class CovidAppModel:
         print("UPLOADING TO ", (key + '/' + filename))
         
         #write array to png
-        filename = filename.replace('.dcm','.png')
-        #filename = filename +'.png' #TODO: not sure what extension this will be. just append png probs
+        filename = filename
+        if filename.find('.dcm') != -1:
+            filename = filename.replace('.dcm','.png')
+        elif (filename.find('.raw') != -1):
+            filename = filename.replace('.raw','.png')
+        else :
+            filename + ".png"
+
         dicom = np.array(dicom)
         dicom += 2000
         dicom *= 10
