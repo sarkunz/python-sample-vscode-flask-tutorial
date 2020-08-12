@@ -5,14 +5,11 @@ from .services import CovidAppServices
 import logging
 import time
 
+services = CovidAppServices()
+
 #To delete
 @app.route("/")
 def whatup():
-    print("ha")
-    # services = CovidAppServices()
-    # exe_name = "huangshan.jpg"
-    # url = services.getExeUrl(exe_name)
-    # return send_file(url, attachment_filename=exe_name)
     return "nothing to see here"
 
 #inp: dicom, outp: url  
@@ -23,7 +20,6 @@ def processImage(): #POST
     if request.method == "POST":
         logging.info("START PROCESS IMAGE")
         startTime = time.time()
-        services = CovidAppServices()
         
         dicomImage = request.files["dicom"]
         startprocess = time.time()
@@ -55,7 +51,6 @@ def fetchReport(uid): #GET
 @app.route("/downloadInstaller")
 def downloadInstaller(): #GET
     print("HERE")
-    services = CovidAppServices()
     exe_name = "huangshan.jpg"
     url = services.getExeUrl(exe_name)
     return url #send_file(url, attachment_filename=exe_name)
