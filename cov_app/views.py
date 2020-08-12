@@ -8,12 +8,12 @@ import time
 #To delete
 @app.route("/")
 def whatup():
-    print("HERE")
+    print("ha")
     # services = CovidAppServices()
     # exe_name = "huangshan.jpg"
     # url = services.getExeUrl(exe_name)
     # return send_file(url, attachment_filename=exe_name)
-    return "WHYY"
+    return "nothing to see here"
 
 #inp: dicom, outp: url  
 # auth token in header

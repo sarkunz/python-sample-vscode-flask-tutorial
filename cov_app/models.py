@@ -1,4 +1,5 @@
 # models- all db interactions
+from . import app
 from datetime import datetime, timedelta
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, generate_container_sas, ContainerSasPermissions
 generate_container_sas, ContainerSasPermissions
@@ -18,16 +19,16 @@ import logging
 
 class CovidAppModel:
     def __init__(self):       
-        self.account_name = 'storageaccountdevus81b4'
-        self.account_key = 'wqhKaJKWMItAW3EnCj9fN4RWD2VzpLAw1yykhvS2e2uvWrYOez1bXMsLizgPQRbmaYOEo+0oQtIlaDW2wuer9A=='
+        self.account_name = app.config.get("AZURE_ACCT")
+        self.account_key = app.config.get("AZURE_KEY")
 
         #get storage blob client
         #OLD jaredtutorial connect str #self.connect_str = 'DefaultEndpointsProtocol=https;AccountName=jaredtutorial9277385973;AccountKey=qgtyoU/MxAMqCMd6QbjQ7E+SMu+rqi2ynhJfcf6/rU5BdOrdlIq4j5QM6UN59vkI9wLEL7tAkQ1LDCW4mL6L+A==;EndpointSuffix=core.windows.net'
-        connect_str = 'DefaultEndpointsProtocol=https;AccountName=storageaccountdevus81b4;AccountKey=wqhKaJKWMItAW3EnCj9fN4RWD2VzpLAw1yykhvS2e2uvWrYOez1bXMsLizgPQRbmaYOEo+0oQtIlaDW2wuer9A==;EndpointSuffix=core.windows.net'
+        connect_str = app.config.get("AZURE_CON_STR") 
         self.blob_service_client = BlobServiceClient.from_connection_string(connect_str)
         self.container_name = 'webappimgs'
 
-        self.mongoCli = MongoClient('mongodb+srv://skunzler:sarah96@cluster0.22wsg.azure.mongodb.net/<dbname>?retryWrites=true&w=majority')
+        self.mongoCli = MongoClient(app.config.get("MONGO_STR") )
 
     def getSasToken(self):
         container_sas_token = generate_container_sas(
