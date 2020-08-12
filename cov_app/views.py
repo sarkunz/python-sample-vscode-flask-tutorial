@@ -58,4 +58,4 @@ def downloadInstaller(): #GET
     services = CovidAppServices()
     exe_name = "huangshan.jpg"
     url = services.getExeUrl(exe_name)
-    return send_file(url, attachment_filename=exe_name)
+    return url #send_file(url, attachment_filename=exe_name)
