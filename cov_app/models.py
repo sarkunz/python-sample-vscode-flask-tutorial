@@ -41,14 +41,15 @@ class CovidAppModel:
 
     def getExeSasToken(self):
         print("get exe sas model")
+        container_name = "exe"
         container_sas_token = generate_container_sas(
             account_name=self.account_name,
-            container_name="exe",
+            container_name=container_name,
             account_key=self.account_key,
             permission=ContainerSasPermissions(read=True),
             expiry=datetime.utcnow() + timedelta(hours=2)
         )
-        return container_sas_token, self.account_name, self.container_name
+        return container_sas_token, self.account_name, container_name
 
     def createDbEntry(self, dicomInfo):
         studies_coll = self.mongoCli.db.studies
