@@ -42,7 +42,7 @@ def processImage(): #POST
 @app.route("/fetchReport/<uid>")
 def fetchReport(uid): #GET
     print("fetch image")
-    info = CovidAppServices().getReportInfo(uid)
+    info = services.getReportInfo(uid)
     status = "FINISHED"
     if isinstance(info, str): #if info == "EXPIRED" || "UNFINISHED"
         status = info
