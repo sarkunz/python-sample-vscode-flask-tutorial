@@ -1,13 +1,19 @@
 from datetime import datetime
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from . import app
 from .services import CovidAppServices
 import logging
+import time
 
 #To delete
 @app.route("/")
 def whatup():
-    return "Heyyyyyy"
+    print("HERE")
+    # services = CovidAppServices()
+    # exe_name = "huangshan.jpg"
+    # url = services.getExeUrl(exe_name)
+    # return send_file(url, attachment_filename=exe_name)
+    return "WHYY"
 
 #inp: dicom, outp: url  
 # auth token in header
@@ -15,31 +21,41 @@ def whatup():
 def processImage(): #POST
     print("process image")
     if request.method == "POST":
-        print("START PROCESS IMAGE")
+        logging.info("START PROCESS IMAGE")
+        startTime = time.time()
         services = CovidAppServices()
         
-        #print(dicomImage)
         dicomImage = request.files["dicom"]
+        startprocess = time.time()
+        print("STARTUP TIME: " + str(startprocess - startTime))
         # if(dicomImage.filename.find('.dcm') == -1):
         #     return "Invalid upload file type"
         print(dicomImage.filename)
-        logging.info("PROCESSING" + dicomImage.filename)
+        print("PROCESSING" + dicomImage.filename)
         path = app.root_path
-        result = services.processImage(path, dicomImage)
+        resultUrl, statusCode = services.processImage(path, dicomImage)
+        print("PROCESS TIME " + str(startprocess- startTime))
+        print("TOTOAL TIME" +  str(time.time() - startTime))
 
-    else:
-        result = "Novarad Home Page"
-    return result #url for fetchReport
+    else: #if it's a GET we'll just send them to novarad's homepage
+        resultUrl = "https://www.novarad.net/"
+    return resultUrl, statusCode #url for fetchReport
 
 #fetches report (HTML)
 #inp: access code, outp: html
 @app.route("/fetchReport/<uid>")
 def fetchReport(uid): #GET
     print("fetch image")
-#accessCode = #request.data["accessCode"]
     info = CovidAppServices().getReportInfo(uid)
     status = "FINISHED"
     if isinstance(info, str): #if info == "EXPIRED" || "UNFINISHED"
         status = info
     return render_template("report.html", info=info, status=status)
 
+@app.route("/downloadInstaller")
+def downloadInstaller(): #GET
+    print("HERE")
+    services = CovidAppServices()
+    exe_name = "huangshan.jpg"
+    url = services.getExeUrl(exe_name)
+    return send_file(url, attachment_filename=exe_name)

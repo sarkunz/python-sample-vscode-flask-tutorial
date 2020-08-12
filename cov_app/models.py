@@ -39,6 +39,17 @@ class CovidAppModel:
         )
         return container_sas_token, self.account_name, self.container_name
 
+    def getExeSasToken(self):
+        print("get exe sas model")
+        container_sas_token = generate_container_sas(
+            account_name=self.account_name,
+            container_name="exe",
+            account_key=self.account_key,
+            permission=ContainerSasPermissions(read=True),
+            expiry=datetime.utcnow() + timedelta(hours=2)
+        )
+        return container_sas_token, self.account_name, self.container_name
+
     def createDbEntry(self, dicomInfo):
         studies_coll = self.mongoCli.db.studies
         #check for study & series ID (id)
@@ -123,7 +134,7 @@ class CovidAppModel:
             return "EXPIRED"
 
         #don't bother getting preds if we don't have many images
-        if entry['numProcessed'] < 10: #TODO factor in last update time (30mins-hr?)
+        if entry['numProcessed'] < 10 and entry['lastUpdated']: #TODO factor in last update time (30mins-hr?) 
             return "UNFINISHED"
 
         preds = self.getPreds(entry['uid'])

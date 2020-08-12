@@ -4,6 +4,12 @@ import pydicom
 import os
 from .models import CovidAppModel
 import numpy as np
+import logging
+import time
+
+def retError(code, message):
+    print(message)
+    return message, code
 
 class CovidAppServices:
     def __init__(self):
@@ -29,7 +35,10 @@ class CovidAppServices:
     #adds dicom to work queue, looks up mongo record, creates and rets URL
     def processImage(self, path, dicom):                
         print("processing dicom")
+        st = time.time()
         dicomData = pydicom.dcmread(dicom, force=True)
+        if not hasattr(dicomData, 'StudyInstanceUID'):
+            return retError(401, "Incorrect File Upload Type")
         dicomInfo = {'studyID' :dicomData.StudyInstanceUID, 
                         'seriesID' : dicomData.SeriesInstanceUID,
                         'siteCode' : dicomData.InstitutionName, #TODO how are we getting this?
@@ -38,23 +47,24 @@ class CovidAppServices:
                         'SOPID' : dicomData.SOPClassUID,
                         'imgName' : str(dicom.filename)
                     }
+        print("processed")
         
         #add dicom info to db
         status, uid = self.model.createDbEntry(dicomInfo)
         if not status:
-            resp = "Failed to create DB entry."
-            #TODO set http response -on any error
-            return resp
+            return retError(500, "Failed to create database entry")
 
         #upload dicoms to azure
         pixel_array = self.getHounsfieldUnits(dicomData)
+        logging.info("ACTUAL processing time " +  str(time.time() - st))
+        stup = time.time()
         status = self.model.uploadDicomToBlob(uid, dicomInfo['imgName'], pixel_array) #TODO  change key from accesscode
         if not status:
-            resp = "Failed to upload Dicom to Blob"
-            return resp
+            return retError(500, "Failed to upload Dicom to Blob")
+        logging.info("END UP " + str(time.time() - stup))
 
         # print("END PROCESS SERVICE")
-        return 'https://covwebapp.azurewebsites.net/fetchReport/' + uid
+        return 'https://covwebapp.azurewebsites.net/fetchReport/' + uid, 201
 
 
     # using generate_container_sas
@@ -74,3 +84,9 @@ class CovidAppServices:
             for im_name in info['exampleImages']:
                 info['imageUrls'].append(f"https://{account_name}.blob.core.windows.net/{container_name}/{im_name}?{container_sas_token}")
         return info
+
+    def getExeUrl(self, exe_name):
+        print("gete exe service")
+        #TODO get differet Sas token
+        container_sas_token, account_name, container_name = self.model.getExeSasToken()
+        return f"https://{account_name}.blob.core.windows.net/{container_name}/{exe_name}?{container_sas_token}"
