@@ -13,7 +13,7 @@
   <div class="spacebetween">
     <div><img src="{{ url_for('static', filename='images/novlogo.svg') }}" alt="NOVARAD" style="width:100px"></div>
     <div>
-      <img src = "{{ url_for('static', filename='images/ailogo.svg') }}" alt="NOVARAD COVIDAI ANALYSIS" style="width:250px">
+      <img src = "{{ url_for('static', filename='images/ailogo.svg') }}" alt="NOVARAD COVIDAI ANALYSIS" style="max-width:250px">
       <h2>Covid-19 AI Diagnostic Assistant</h2>
     </div>
     <div><img src="{{ url_for('static', filename='images/microsoftlogo.png') }}" alt="Microsoft" style="width:100px"></div>
@@ -44,7 +44,7 @@
         {% if info.overall == "NO" %}
           <p>Representative lung images:</p>
         {% else %}
-          <p>Evidence of COVID-19 found in the following images:</p>
+          <p>Evidence of COVID-19 shown in the following images:</p>
         {% endif %}
         <div class="spaceevenly">
         {% for url in info.imageUrls %}
