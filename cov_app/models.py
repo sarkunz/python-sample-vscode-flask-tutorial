@@ -24,11 +24,10 @@ class CovidAppModel:
 
         #get storage blob client
         #OLD jaredtutorial connect str #self.connect_str = 'DefaultEndpointsProtocol=https;AccountName=jaredtutorial9277385973;AccountKey=qgtyoU/MxAMqCMd6QbjQ7E+SMu+rqi2ynhJfcf6/rU5BdOrdlIq4j5QM6UN59vkI9wLEL7tAkQ1LDCW4mL6L+A==;EndpointSuffix=core.windows.net'
-        connect_str = app.config.get("AZURE_CON_STR") 
-        self.blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+        self.blob_service_client = BlobServiceClient.from_connection_string(app.config.get("AZURE_CON_STR") )
         self.container_name = 'webappimgs'
 
-        self.mongoCli = MongoClient(app.config.get("MONGO_STR") )
+        self.studies_coll = MongoClient(app.config.get("MONGO_STR")).db.studies
 
     def getSasToken(self):
         container_sas_token = generate_container_sas(
@@ -53,9 +52,8 @@ class CovidAppModel:
         return container_sas_token, self.account_name, container_name
 
     def createDbEntry(self, dicomInfo):
-        studies_coll = self.mongoCli.db.studies
         #check for study & series ID (id)
-        entry = studies_coll.find_one({'studyID': dicomInfo['studyID']})
+        entry = self.studies_coll.find_one({'studyID': dicomInfo['studyID']})
         if(entry):
             uid = entry['uid']
             query = {'studyID': dicomInfo['studyID']}
@@ -65,7 +63,7 @@ class CovidAppModel:
                 'imCount': entry['imCount'] + 1,
                 'createdTime' : datetime.utcnow()
             }
-            status = studies_coll.find_one_and_update(query, {'$set': data})
+            status = self.studies_coll.find_one_and_update(query, {'$set': data})
         else:
             #create new accesscode
             #TODO always 8 chars- zero pad
@@ -85,7 +83,7 @@ class CovidAppModel:
                     'accessCode' : accessCode,
                     'topImages': [{"pred": 0, "im":""},{"pred": 0, "im":""},{"pred": 0, "im":""}]
             }
-            status = studies_coll.insert_one(data)
+            status = self.studies_coll.insert_one(data)
         #TODO: check it worked and return status
         print("STATUS DB", status)
         status = True
@@ -126,8 +124,7 @@ class CovidAppModel:
     def getImageInfo(self, uid):
         #facility, studydate, studytime, pred(iction), percShown, overall, runIndxs, photos, recommendation
         print("getting img info", uid)
-        studies_coll = self.mongoCli.db.studies
-        entry = studies_coll.find_one({'uid': uid})
+        entry = self.studies_coll.find_one({'uid': uid})
 
         #if not valid study 
         #TODO check that there are images- not just no db entry
@@ -232,6 +229,3 @@ class CovidAppModel:
 
         os.remove(filename)
         return np.array(ary)
-
-    def get(self, params):
-        return -1
