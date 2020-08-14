@@ -32,7 +32,7 @@ def processImage(): #POST
         path = app.root_path
         resultUrl, statusCode = services.processImage(path, dicomImage)
         print("PROCESS TIME " + str(startprocess- startTime))
-        print("TOTOAL TIME" +  str(time.time() - startTime))
+        print("TOTAL TIME" +  str(time.time() - startTime))
 
     else: #if it's a GET we'll just send them to novarad's homepage
         resultUrl = "https://www.novarad.net/"

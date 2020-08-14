@@ -66,10 +66,10 @@
       </div-->
 
       <div class="left">
-        <p class="xsmallFont">Disclaimer: Novarad's COVID AI runs five consecutive models on each study to better ensure accuracy and reduces
-          the chance of false negatives. Currently, the models have been trained on 46 CT scans of both patients with confirmed COVID and
-          those cosidered Normal. The models have also been trained to week out other forms of pneumonia. The total images run through the
-          algorithm is 13000 images. The current Specificity is 96% and the current sensitivity is 98% with an overall accuracy of 98%.</p>
+        <p class="xsmallFont">Disclaimer: Novarad's COVID AI runs {{info.numModels}} consecutive models on each study to better ensure accuracy and reduces
+          the chance of false negatives. Currently, the models have been trained on {{info.numTrainScans}} CT scans of both patients with confirmed COVID and
+          those cosidered Normal. The models have also been trained to weed out other forms of pneumonia. The total images run through the
+          algorithm is {{info.numTrainImages}} images. The current specificity is {{info.specificity}}% and the current sensitivity is {{info.sensitivity}}% with an overall accuracy of {{info.accuracy}}%.</p>
       </div>
 
   {% elif status == "UNFINISHED" %}

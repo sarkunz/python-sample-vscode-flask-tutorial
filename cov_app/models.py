@@ -127,8 +127,15 @@ class CovidAppModel:
         #TODO: if error return False
         return True
 
+    def getTrainingInfo(self):
+        #query db for trianing info
+        info = self.mongoClient.db.model_info.find_one({'name': 'modelInfo'})
+        if info: 
+            return info
+        else: 
+            return False
+
     def getImageInfo(self, uid):
-        #facility, studydate, studytime, pred(iction), percShown, overall, runIndxs, photos, recommendation
         print("getting img info", uid)
         entry = self.studies_coll.find_one({'uid': uid})
 
@@ -139,7 +146,10 @@ class CovidAppModel:
             return "EXPIRED"
 
         #don't bother getting preds if we don't have many images
-        if entry['numProcessed'] < 10 and entry['lastUpdated']: #TODO factor in last update time (30mins-hr?) 
+        secsSinceUpd = (entry['lastUpdated'] - datetime.utcnow()).total_seconds()
+        minsSinceUpd = divmod(secsSinceUpd, 60)[0] 
+        #If we have less than 15 imgs and it's been less than 30 mins we'll assume we don't have all the data
+        if entry['numProcessed'] < 15 and minsSinceUpd < 30: 
             return "UNFINISHED"
 
         preds = self.getPreds(entry['uid'])
@@ -148,7 +158,9 @@ class CovidAppModel:
         exImages = []
         if "topImages" in entry:
             exImages = [i.get("im") for i in entry['topImages']]
-        print("topimages", exImages)          
+        print("topimages", exImages)     
+
+        trainInfo = self.getTrainingInfo()
 
         ret = {'facility': entry['siteCode'],
                 'numImgs' : entry['imCount'],
@@ -161,8 +173,13 @@ class CovidAppModel:
                 'pred': conf,
                 'percShown': str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
                 'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
-                'availUntil' : '08/12/2020' #TODO how are we going to delete these?
-         }# studytime, pred(iction), percShown, overall, runIndxs, photos, recommendation
+                'numModels' : trainInfo['numModels'],
+                'numTrainScans' : trainInfo['numTrainScans'],
+                'numTrainImages' : trainInfo['numTrainImages'],
+                'specificity' : trainInfo['specificity'],
+                'sensitivity' : trainInfo['sensitivity'],
+                'accuracy' : trainInfo['accuracy']
+         }
         
         return ret
 
