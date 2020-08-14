@@ -72,8 +72,9 @@ class CovidAppServices:
     def getSasToken(self):
         return self.model.getSasToken()
 
-    def getReportInfo(self, studyID):
+    def getReportInfo(self, uid):
         print("get report info")
+        info = self.model.getImageInfo(uid)
         if isinstance(info, str): #returns status if unfinished or no entry
             return info
         if(len(info['exampleImages'])):
