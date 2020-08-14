@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Flask, render_template, request, send_file, url_for
+from flask import Flask, render_template, request, send_file, url_for, redirect
 from . import app
 from .services import CovidAppServices
 import logging
@@ -11,7 +11,7 @@ services = CovidAppServices()
 #To delete
 @app.route("/")
 def whatup():
-    return "nothing to see here"
+    return redirect("https://www.novarad.net/", code=302)
 
 #inp: dicom, outp: url  
 # auth token in header
@@ -55,6 +55,7 @@ def downloadInstaller(): #GET
     userID = "sars" #request.args.get("hubUserID")
     facility="idk where" #request.args.get("facility")
     services.saveUserID(userID, facility)
-    exe_name = 'novlogo.svg'
-    #url = services.getExeUrl(exe_name)
-    return send_file(os.path.join('static','images', exe_name), attachment_filename=exe_name)
+    exe_name = 'huangshan.jpg'#'novlogo.svg'
+    url = services.getExeUrl(exe_name)
+    #return send_file(os.path.join('static','images', exe_name), attachment_filename=exe_name) #can either return url or file- not sure if should save it to blob or webapp
+    return redirect(url, code=302)
