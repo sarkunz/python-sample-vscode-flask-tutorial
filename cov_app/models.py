@@ -178,7 +178,8 @@ class CovidAppModel:
                 'numTrainImages' : trainInfo['numTrainImages'],
                 'specificity' : trainInfo['specificity'],
                 'sensitivity' : trainInfo['sensitivity'],
-                'accuracy' : trainInfo['accuracy']
+                'accuracy' : trainInfo['accuracy'],
+                'currentTime' : datetime.now().strftime("%m/%d/%Y %H:%M")
          }
         
         return ret

@@ -9,13 +9,13 @@
 
 <body>
   <title>Covid-19 AI Diagnostic Assistant</title>
-  <div class="spacebetween">
+  <div class="spacebetween" style="padding:0">
     <div><img src="{{ url_for('static', filename='images/novlogo.svg') }}" alt="NOVARAD" style="width:100px"></div>
-    <div>
-      <img src = "{{ url_for('static', filename='images/ailogo.svg') }}" alt="NOVARAD COVIDAI ANALYSIS" style="max-width:250px">
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <img src = "{{ url_for('static', filename='images/ailogo.svg') }}" alt="NOVARAD COVIDAI ANALYSIS" style="max-width:180px">
       <h2>Covid-19 AI Diagnostic Assistant</h2>
     </div>
-    <div><img src="{{ url_for('static', filename='images/microsoftlogo.png') }}" alt="Microsoft" style="width:100px"></div>
+    <div style="width:100px"><!--img src="{{ url_for('static', filename='images/microsoftlogo.png') }}" alt="Microsoft" style="width:100px"--></div>
   </div>
     
   {% if status == "FINISHED" %}
@@ -32,7 +32,7 @@
       </div>
 
       <div class="left">
-        <h1>Diagnosis</h1>
+        <h1 style="padding-top:0.6em">Diagnosis</h1>
         <p>Diagnostic finding consistent with COVID-19 present: {{info.overall}}</p>
         <p>Confidence level: {{info.pred}}</p>  
         <p>Percent of CT showing evidence of COVID-19: {{info.percShown}}</p>
@@ -57,7 +57,7 @@
       </div>
 
       <div class="left">
-        <h1>Recommendations</h1>
+        <h1 style="padding-top:1em">Recommendations</h1>
         <p>{{info.recommendation}}</p>
       </div>
 
@@ -65,7 +65,7 @@
         <p style="margin-top:2em">Report available until: {{info.availUntil}}</p>
       </div-->
 
-      <div class="left">
+      <div class="left" style="padding-top:2em">
         <p class="xsmallFont">Disclaimer: Novarad's COVID AI runs {{info.numModels}} consecutive models on each study to better ensure accuracy and reduces
           the chance of false negatives. Currently, the models have been trained on {{info.numTrainScans}} CT scans of both patients with confirmed COVID and
           those cosidered Normal. The models have also been trained to weed out other forms of pneumonia. The total images run through the
@@ -79,4 +79,9 @@
     <h2 class="center">No data found for this study, entry may have expired.</h2>
  
   {% endif %}
+  <div class="spacebetween">
+    <p><strong>Powered by Novarad</strong></p>
+    <p><strong>{{info.currentTime}}</strong></p>
+  </div>
+  
 </body>

@@ -41,7 +41,7 @@ class CovidAppServices:
             return retError(401, "Incorrect File Upload Type")
         dicomInfo = {'studyID' :dicomData.StudyInstanceUID, 
                         'seriesID' : dicomData.SeriesInstanceUID,
-                        'siteCode' : dicomData.InstitutionName, #TODO how are we getting this?
+                        'siteCode' : dicomData.InstitutionName,
                         'studyDate' : self.formatDate(str(dicomData.StudyDate)),
                         'studyTime' : self.formatTime(str(dicomData.StudyTime)),
                         'SOPID' : dicomData.SOPClassUID,
