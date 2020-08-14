@@ -74,7 +74,6 @@ class CovidAppServices:
 
     def getReportInfo(self, studyID):
         print("get report info")
-        info = self.model.getImageInfo(studyID)
         if isinstance(info, str): #returns status if unfinished or no entry
             return info
         if(len(info['exampleImages'])):
@@ -90,3 +89,6 @@ class CovidAppServices:
         #TODO get differet Sas token
         container_sas_token, account_name, container_name = self.model.getExeSasToken()
         return f"https://{account_name}.blob.core.windows.net/{container_name}/{exe_name}?{container_sas_token}"
+
+    def saveUserID(self, userID, facility):
+        self.model.saveUserID(userID, facility)

@@ -1,9 +1,10 @@
 from datetime import datetime
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, url_for
 from . import app
 from .services import CovidAppServices
 import logging
 import time
+import os
 
 services = CovidAppServices()
 
@@ -51,6 +52,9 @@ def fetchReport(uid): #GET
 @app.route("/downloadInstaller")
 def downloadInstaller(): #GET
     print("HERE")
-    exe_name = "huangshan.jpg"
-    url = services.getExeUrl(exe_name)
-    return url #send_file(url, attachment_filename=exe_name)
+    userID = "sars" #request.args.get("hubUserID")
+    facility="idk where" #request.args.get("facility")
+    services.saveUserID(userID, facility)
+    exe_name = 'novlogo.svg'
+    #url = services.getExeUrl(exe_name)
+    return send_file(os.path.join('static','images', exe_name), attachment_filename=exe_name)

@@ -27,7 +27,8 @@ class CovidAppModel:
         self.blob_service_client = BlobServiceClient.from_connection_string(app.config.get("AZURE_CON_STR") )
         self.container_name = 'webappimgs'
 
-        self.studies_coll = MongoClient(app.config.get("MONGO_STR")).db.studies
+        self.mongoClient = MongoClient(app.config.get("MONGO_STR"))
+        self.studies_coll = self.mongoClient.db.studies
 
     def getSasToken(self):
         container_sas_token = generate_container_sas(
@@ -50,6 +51,11 @@ class CovidAppModel:
             expiry=datetime.utcnow() + timedelta(hours=2)
         )
         return container_sas_token, self.account_name, container_name
+    
+    def saveUserID(self, userID, facility):
+        print("save userID")
+        coll = self.mongoClient.db.installer_access
+        coll.update({'hubUserID': userID}, {'hubUserID': userID, 'facility': facility}, upsert=True)
 
     def createDbEntry(self, dicomInfo):
         #check for study & series ID (id)
