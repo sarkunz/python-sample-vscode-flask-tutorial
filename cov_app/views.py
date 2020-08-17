@@ -47,6 +47,7 @@ def fetchReport(uid): #GET
     status = "FINISHED"
     if isinstance(info, str): #if info == "EXPIRED" || "UNFINISHED"
         status = info
+        info = {'currentTime' : datetime.now().strftime("%m/%d/%Y %H:%M")}
     return render_template("report.html", info=info, status=status)
 
 @app.route("/downloadInstaller")
