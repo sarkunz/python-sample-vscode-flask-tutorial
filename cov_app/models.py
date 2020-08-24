@@ -155,13 +155,11 @@ class CovidAppModel:
             return "EXPIRED"
 
         #don't bother getting preds if we don't have many images
-        secsSinceUpd = (entry['lastUpdated'] - datetime.utcnow()).total_seconds()
+        secsSinceUpd = (datetime.utcnow() - entry['lastUpdated']).total_seconds()
         minsSinceUpd = divmod(secsSinceUpd, 60)[0] 
-        print("numprocessed", entry['numProcessed'])
-        log("MINSSINCEUPD" +  str(minsSinceUpd))
         #If we have less than 15 imgs and it's been less than 30 mins we'll assume we don't have all the data
-        # if entry['numProcessed'] < 15 and minsSinceUpd < 30: 
-        #     return "UNFINISHED"
+        if entry['numProcessed'] < 15 and minsSinceUpd < 30: 
+            return "UNFINISHED"
 
         preds = self.getPreds(entry['uid'])
         overall, covCount, conf = self.getOverallPred(preds)
@@ -182,7 +180,7 @@ class CovidAppModel:
                 'exampleImages': exImages,
                 'overall' : overall,
                 'pred': conf, #TODO change back to numProcessed!
-                'percShown': str(math.floor(covCount/entry['imCount'] * 10)) + "%", #str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
+                'percShown': str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
                 'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
                 'numModels' : trainInfo['numModels'],
                 'numTrainScans' : trainInfo['numTrainScans'],
