@@ -17,6 +17,13 @@ import math
 import uuid
 import logging
 
+def log(message, type="info"):
+    if type == "error":
+        logging.error(message)
+    else:
+        #logging.info(message)
+        print(message)
+
 class CovidAppModel:
     def __init__(self):       
         self.account_name = app.config.get("AZURE_ACCT")
@@ -41,7 +48,7 @@ class CovidAppModel:
         return container_sas_token, self.account_name, self.container_name
 
     def getExeSasToken(self):
-        print("get exe sas model")
+        log("get exe sas model")
         container_name = "exe"
         container_sas_token = generate_container_sas(
             account_name=self.account_name,
@@ -53,11 +60,11 @@ class CovidAppModel:
         return container_sas_token, self.account_name, container_name
     
     def saveUserID(self, userID, facility):
-        print("save userID")
+        log("save userID")
         coll = self.mongoClient.db.installer_access
         coll.update({'hubUserID': userID}, {'hubUserID': userID, 'facility': facility}, upsert=True)
 
-    def createDbEntry(self, dicomInfo):
+    def createDbEntry(self, dicomInfo, ipAddr):
         #check for study & series ID (id)
         entry = self.studies_coll.find_one({'studyID': dicomInfo['studyID']})
         if(entry):
@@ -67,7 +74,8 @@ class CovidAppModel:
                 'SOPID' : dicomInfo['SOPID'], #TODO this should be array. Needed tho??
                 'lastUpdated' : datetime.utcnow(),
                 'imCount': entry['imCount'] + 1,
-                'createdTime' : datetime.utcnow()
+                'createdTime' : datetime.utcnow(),
+                'ipAddress': ipAddr
             }
             status = self.studies_coll.find_one_and_update(query, {'$set': data})
         else:
@@ -87,17 +95,18 @@ class CovidAppModel:
                     'imCount': 1,
                     'numProcessed' : 0,
                     'accessCode' : accessCode,
-                    'topImages': [{"pred": 0, "im":""},{"pred": 0, "im":""},{"pred": 0, "im":""}]
+                    'topImages': [{"pred": 0, "im":""},{"pred": 0, "im":""},{"pred": 0, "im":""}],
+                    'ipAddress': ipAddr
             }
             status = self.studies_coll.insert_one(data)
         #TODO: check it worked and return status
-        print("STATUS DB", status)
+        log("STATUS DB", status)
         status = True
         return status, uid
 
     def uploadDicomToBlob(self, key, filename, dicom):        
         #TODO do this in a thread
-        print("UPLOADING TO ", (key + '/' + filename))
+        log("UPLOADING TO ", (key + '/' + filename))
         
         #write array to png
         filename = filename
@@ -123,7 +132,7 @@ class CovidAppModel:
         #delete local file
         os.remove(filename)
 
-        print("UPLOADED @:", key + '/' + filename)
+        log("UPLOADED @:", key + '/' + filename)
         #TODO: if error return False
         return True
 
@@ -136,7 +145,7 @@ class CovidAppModel:
             return False
 
     def getImageInfo(self, uid):
-        print("getting img info", uid)
+        log("getting img info", uid)
         entry = self.studies_coll.find_one({'uid': uid})
 
         #if not valid study 
@@ -148,9 +157,11 @@ class CovidAppModel:
         #don't bother getting preds if we don't have many images
         secsSinceUpd = (entry['lastUpdated'] - datetime.utcnow()).total_seconds()
         minsSinceUpd = divmod(secsSinceUpd, 60)[0] 
+        print("numprocessed", entry['numProcessed'])
+        log("MINSSINCEUPD" +  str(minsSinceUpd))
         #If we have less than 15 imgs and it's been less than 30 mins we'll assume we don't have all the data
-        if entry['numProcessed'] < 15 and minsSinceUpd < 30: 
-            return "UNFINISHED"
+        # if entry['numProcessed'] < 15 and minsSinceUpd < 30: 
+        #     return "UNFINISHED"
 
         preds = self.getPreds(entry['uid'])
         overall, covCount, conf = self.getOverallPred(preds)
@@ -158,7 +169,7 @@ class CovidAppModel:
         exImages = []
         if "topImages" in entry:
             exImages = [i.get("im") for i in entry['topImages']]
-        print("topimages", exImages)     
+        log("topimages", exImages)     
 
         trainInfo = self.getTrainingInfo()
 
@@ -170,8 +181,8 @@ class CovidAppModel:
                 'accessCode': entry['accessCode'],
                 'exampleImages': exImages,
                 'overall' : overall,
-                'pred': conf,
-                'percShown': str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
+                'pred': conf, #TODO change back to numProcessed!
+                'percShown': str(math.floor(covCount/entry['imCount'] * 10)) + "%", #str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
                 'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
                 'numModels' : trainInfo['numModels'],
                 'numTrainScans' : trainInfo['numTrainScans'],
@@ -229,7 +240,7 @@ class CovidAppModel:
         #download txt prediction file from azure
         filename = accessCode + '-results.txt'
         blobname = accessCode + "/" + accessCode + '-results.txt'
-        print("getting blob ", blobname)
+        log("getting blob ", blobname)
         blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=blobname)
         downFile = open(filename, "wb+")
         downFile.write(blob_client.download_blob().readall())

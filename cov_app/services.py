@@ -7,8 +7,15 @@ import numpy as np
 import logging
 import time
 
+def log(message, type="info"):
+    if type == "error":
+        logging.error(message)
+    else:
+        #logging.info(message)
+        print(message)
+
 def retError(code, message):
-    print(message)
+    log(message)
     return message, code
 
 class CovidAppServices:
@@ -33,8 +40,8 @@ class CovidAppServices:
     
     #takes anonymized file, opens dicom, takes minimal info, writes png
     #adds dicom to work queue, looks up mongo record, creates and rets URL
-    def processImage(self, path, dicom):                
-        print("processing dicom")
+    def processImage(self, path, dicom, ip_addr):                
+        log("processing dicom")
         st = time.time()
         dicomData = pydicom.dcmread(dicom, force=True)
         if not hasattr(dicomData, 'StudyInstanceUID'):
@@ -47,10 +54,10 @@ class CovidAppServices:
                         'SOPID' : dicomData.SOPClassUID,
                         'imgName' : str(dicom.filename)
                     }
-        print("processed")
+        log("processed")
         
         #add dicom info to db
-        status, uid = self.model.createDbEntry(dicomInfo)
+        status, uid = self.model.createDbEntry(dicomInfo, ip_addr)
         if not status:
             return retError(500, "Failed to create database entry")
 
@@ -63,7 +70,7 @@ class CovidAppServices:
             return retError(500, "Failed to upload Dicom to Blob")
         logging.info("END UP " + str(time.time() - stup))
 
-        # print("END PROCESS SERVICE")
+        # log("END PROCESS SERVICE")
         return 'https://covwebapp.azurewebsites.net/fetchReport/' + uid, 201
 
 
@@ -73,12 +80,12 @@ class CovidAppServices:
         return self.model.getSasToken()
 
     def getReportInfo(self, uid):
-        print("get report info")
+        log("get report info")
         info = self.model.getImageInfo(uid)
         if isinstance(info, str): #returns status if unfinished or no entry
             return info
         if(len(info['exampleImages'])):
-            print("getting imageurls")
+            log("getting imageurls")
             info['imageUrls'] = []
             container_sas_token, account_name, container_name = self.getSasToken()
             for im_name in info['exampleImages']:
@@ -86,7 +93,7 @@ class CovidAppServices:
         return info
 
     def getExeUrl(self, exe_name):
-        print("gete exe service")
+        log("gete exe service")
         #TODO get differet Sas token
         container_sas_token, account_name, container_name = self.model.getExeSasToken()
         return f"https://{account_name}.blob.core.windows.net/{container_name}/{exe_name}?{container_sas_token}"
