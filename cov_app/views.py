@@ -8,6 +8,13 @@ import os
 
 services = CovidAppServices()
 
+def log(message, type="info"):
+    if type == "error":
+        logging.error(message)
+    else:
+        #logging.info(message)
+        print(message)
+
 #To delete
 @app.route("/")
 def whatup():
@@ -17,22 +24,14 @@ def whatup():
 # auth token in header
 @app.route("/processImage", methods=["GET", "POST"])
 def processImage(): #POST
-    print("process image")
+    log("process image")
     if request.method == "POST":
-        logging.info("START PROCESS IMAGE")
-        startTime = time.time()
-        
         dicomImage = request.files["dicom"]
-        startprocess = time.time()
-        print("STARTUP TIME: " + str(startprocess - startTime))
-        # if(dicomImage.filename.find('.dcm') == -1):
-        #     return "Invalid upload file type"
-        print(dicomImage.filename)
-        print("PROCESSING" + dicomImage.filename)
+        ip_addr = request.remote_addr
+
+        log("PROCESSING" + dicomImage.filename)
         path = app.root_path
-        resultUrl, statusCode = services.processImage(path, dicomImage)
-        print("PROCESS TIME " + str(startprocess- startTime))
-        print("TOTAL TIME" +  str(time.time() - startTime))
+        resultUrl, statusCode = services.processImage(path, dicomImage, ip_addr)
 
     else: #if it's a GET we'll just send them to novarad's homepage
         resultUrl = "https://www.novarad.net/"
@@ -42,7 +41,7 @@ def processImage(): #POST
 #inp: access code, outp: html
 @app.route("/fetchReport/<uid>")
 def fetchReport(uid): #GET
-    print("fetch image")
+    log("fetch image")
     info = services.getReportInfo(uid)
     status = "FINISHED"
     if isinstance(info, str): #if info == "EXPIRED" || "UNFINISHED"
@@ -52,7 +51,9 @@ def fetchReport(uid): #GET
 
 @app.route("/downloadInstaller")
 def downloadInstaller(): #GET
-    print("HERE")
+    log("HERE")
+    ip_addr = request.remote_addr
+    UID = "idk" # TODO either get uid or make one from hub info
     userID = "sars" #request.args.get("hubUserID")
     facility="idk where" #request.args.get("facility")
     services.saveUserID(userID, facility)
