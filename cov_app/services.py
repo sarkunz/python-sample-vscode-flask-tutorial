@@ -6,6 +6,7 @@ from .models import CovidAppModel
 import numpy as np
 import logging
 import time
+import uuid
 
 def log(message, type="info"):
     if type == "error":
@@ -98,5 +99,17 @@ class CovidAppServices:
         container_sas_token, account_name, container_name = self.model.getExeSasToken()
         return f"https://{account_name}.blob.core.windows.net/{container_name}/{exe_name}?{container_sas_token}"
 
-    def saveUserID(self, userID, facility):
-        self.model.saveUserID(userID, facility)
+    #get most recent hubspot form entry and create ID from info
+    #TODO START HERE
+    def createUserID(self):
+        #QUERY hub api. 
+        url = f"https://api.hubapi.com/form-integrations/v1/submissions/forms/{app.config.get('HUB_FORM_ID')}?hapikey={app.config.get('HUB_API_KEY')}"
+        #Use submittedAt value for UID
+        #id = resp[0].submittedAt
+        id = "userID"
+        #for ids, get most recent id not in db
+        return id
+
+    def saveUserID(self, ipAddr):
+        userID = str(uuid.uuid1()) #self.createUserID()
+        self.model.saveUserID(userID, ipAddr)

@@ -59,10 +59,11 @@ class CovidAppModel:
         )
         return container_sas_token, self.account_name, container_name
     
-    def saveUserID(self, userID, facility):
+    def saveUserID(self, userID, ipAddr):
         log("save userID")
         coll = self.mongoClient.db.installer_access
-        coll.update({'hubUserID': userID}, {'hubUserID': userID, 'facility': facility}, upsert=True)
+        userID = str(uuid.uuid1())
+        coll.update({'userID': userID}, {'userID': userID, 'ip_address': ipAddr}, upsert=True)
 
     def createDbEntry(self, dicomInfo, ipAddr):
         #check for study & series ID (id)

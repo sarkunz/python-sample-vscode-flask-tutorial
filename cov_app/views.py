@@ -53,11 +53,8 @@ def fetchReport(uid): #GET
 def downloadInstaller(): #GET
     log("HERE")
     ip_addr = request.remote_addr
-    UID = "idk" # TODO either get uid or make one from hub info
-    userID = "sars" #request.args.get("hubUserID")
-    facility="idk where" #request.args.get("facility")
-    services.saveUserID(userID, facility)
-    exe_name = 'huangshan.jpg'#'novlogo.svg'
+    services.saveUserID(ip_addr)
+    exe_name = 'Setup.exe'
     url = services.getExeUrl(exe_name)
     #return send_file(os.path.join('static','images', exe_name), attachment_filename=exe_name) #can either return url or file- not sure if should save it to blob or webapp
     return redirect(url, code=302)
