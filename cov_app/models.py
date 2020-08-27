@@ -48,7 +48,6 @@ class CovidAppModel:
         return container_sas_token, self.account_name, self.container_name
 
     def getExeSasToken(self):
-        log("get exe sas model")
         container_name = "exe"
         container_sas_token = generate_container_sas(
             account_name=self.account_name,
@@ -60,7 +59,6 @@ class CovidAppModel:
         return container_sas_token, self.account_name, container_name
     
     def saveUserID(self, userID, ipAddr):
-        log("save userID")
         coll = self.mongoClient.db.installer_access
         userID = str(uuid.uuid1())
         coll.update({'userID': userID}, {'userID': userID, 'ip_address': ipAddr}, upsert=True)
@@ -101,14 +99,11 @@ class CovidAppModel:
             }
             status = self.studies_coll.insert_one(data)
         #TODO: check it worked and return status
-        log("STATUS DB", status)
         status = True
         return status, uid
 
     def uploadDicomToBlob(self, key, filename, dicom):        
-        #TODO do this in a thread
-        log("UPLOADING TO ", (key + '/' + filename))
-        
+        #TODO thread this function
         #write array to png
         filename = filename
         if filename.find('.dcm') != -1:
@@ -122,7 +117,6 @@ class CovidAppModel:
         dicom += 2000
         dicom *= 10
         imsave(filename, dicom.astype(np.uint16))
-        #cv2.imwrite(filename,dicom.astype(np.uint16))
         dcmFile = open(filename, "rb")
 
         blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=key + '/' + filename) #key/txdDoc.txt
@@ -133,7 +127,6 @@ class CovidAppModel:
         #delete local file
         os.remove(filename)
 
-        log("UPLOADED @:", key + '/' + filename)
         #TODO: if error return False
         return True
 
@@ -168,7 +161,6 @@ class CovidAppModel:
         exImages = []
         if "topImages" in entry:
             exImages = [i.get("im") for i in entry['topImages']]
-        log("topimages", exImages)     
 
         trainInfo = self.getTrainingInfo()
 
@@ -180,7 +172,7 @@ class CovidAppModel:
                 'accessCode': entry['accessCode'],
                 'exampleImages': exImages,
                 'overall' : overall,
-                'pred': conf, #TODO change back to numProcessed!
+                'pred': str(conf) + "%", #TODO change back to numProcessed!
                 'percShown': str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
                 'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
                 'numModels' : trainInfo['numModels'],
@@ -194,44 +186,32 @@ class CovidAppModel:
         
         return ret
 
+    #Calcs and rets overall covid prediction and confidance level
     def getOverallPred(self, data):
-        mean = np.mean(data)
-        outp = "NO"
-        conf = "50%"
-        covCount = 0
-        tr = np.array(data) #.transpose()
-        ####indet
-        #if norm area > 0.45
-        if mean > 0.35:
-            outp = "INDETERMINATE"
+        indetCutoff = 0.4
+        yesCutoff = 0.55
         
-        #if 2+ models pred 0.75+ on 2+ imgs
-        colct = np.array([len(np.where(row > 0.75)[0]) for row in tr])
-        rowct = len(colct[colct >= 2])
-        if(rowct >= 2):
-            outp = "INDETERMINATE"
-            covCount = rowct
+        maxpred = max(data[:,-1])
+        outp = "NO"
+        if maxpred >= indetCutoff:
+            outp="INDETERMINATE"
+        if maxpred > yesCutoff:
+            outp="YES"
 
-        ######yes
-        #if norm area > 0.65
-        if mean > 0.55:
-            outp = "YES"
-            conf = "95%"
+        #conf level is y on logarithmic curve fit to test data
+        infpt = 0.5313
+        hillcoef = -24.7729
+        conf = round(1/(1+((maxpred/infpt)**hillcoef)), 3)
+        if maxpred < indetCutoff:
+            conf = 1 - conf
+        conf *= 100
 
-        #if 2+ models pred 0.90+ on 2+ imgs
-        colct = np.array([len(np.where(row > 0.90)[0]) for row in tr])
-        rowct = len(colct[colct >= 2])
-        if(rowct >= 2):
-            outp = "YES"
-            conf = "95%"
+        covCount = 0
+        ar = np.array(data)
+        #Get count of ims pred >= 0.4
+        colct = np.array([len(np.where(row >= indetCutoff)[0]) for row in ar])
+        covCount = len(colct)
 
-        # #if 2+ models pred 0.98+ on 2+ imgs
-        # colct = np.array([len(np.where(row > 0.98)[0]) for row in tr])
-        # rowct = len(colct[colct >= 2])
-        # if(rowct >= 2):
-        #     outp = "yes"
-
-        ###else outp is no
         return outp, covCount, conf
 
     #uses accessCode to get azure blob with predictions and return numpy array of preds (unsorted)
@@ -239,7 +219,6 @@ class CovidAppModel:
         #download txt prediction file from azure
         filename = accessCode + '-results.txt'
         blobname = accessCode + "/" + accessCode + '-results.txt'
-        log("getting blob ", blobname)
         blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=blobname)
         downFile = open(filename, "wb+")
         downFile.write(blob_client.download_blob().readall())
