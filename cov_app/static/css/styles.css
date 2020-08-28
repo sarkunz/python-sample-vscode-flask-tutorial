@@ -75,6 +75,13 @@ table, th, td {
     justify-content: space-between;
 }
 
+.clickImg{
+    width:150px;
+}
+.clickImg:hover{
+    width:152px;
+}
+
 .xsmallFont{
     font-size: x-small;
 }

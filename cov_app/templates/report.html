@@ -45,11 +45,11 @@
         {% else %}
           <p>Evidence of COVID-19 shown in the following images:</p>
         {% endif %}
-        <div class="spaceevenly">
+        <div class="spaceevenly" style="height:153px">
         {% for url in info.imageUrls %}
             <div>
               <a href="{{url}}" target="_blank">
-                <img src="{{url}}" style="width:150px" alt="Scan Image">
+                <img src="{{url}}" class="clickImg" alt="Scan Image">
               </a>
             </div>
         {% endfor %}
