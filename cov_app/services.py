@@ -101,8 +101,8 @@ class CovidAppServices:
     #get most recent hubspot form entry and create ID from info
     #TODO just gets most recent hubspot entry. better way?
     def createUserID(self):
-        return str(uuid.uuid1())
-        #QUERY hub api. 
+        return str(uuid.uuid1()) # UNTIL WE SWITCH TO HUBSPOT
+        #query hub api. 
         url = f"https://api.hubapi.com/form-integrations/v1/submissions/forms/{app.config.get('HUB_FORM_ID')}?hapikey={app.config.get('HUB_API_KEY')}"
         resp = requests.get(url)
         data = json.loads(resp.text)
