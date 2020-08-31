@@ -82,6 +82,12 @@ table, th, td {
     width:152px;
 }
 
+@media (min-width:961px)  {
+    .fixedImHeight{
+        height:153px;
+    }
+}
+
 .xsmallFont{
     font-size: x-small;
 }

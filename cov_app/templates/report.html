@@ -33,9 +33,9 @@
 
       <div class="left">
         <h1 style="padding-top:0.6em">Diagnosis</h1>
-        <p>Diagnostic finding consistent with COVID-19 present: {{info.overall}}</p>
-        <p>Confidence level: {{info.pred}}</p>  
-        <p>Percent of CT showing evidence of COVID-19: {{info.percShown}}</p>
+        <p>Diagnostic finding consistent with COVID-19 present: <b>{{info.overall}}</b></p>
+        <p>Confidence level: <b>{{info.pred}}</b></p>  
+        <p>Percent of CT showing evidence of COVID-19: <b>{{info.percShown}}</b></p>
       </div>
 
       <div class="left"">
@@ -45,7 +45,7 @@
         {% else %}
           <p>Evidence of COVID-19 shown in the following images:</p>
         {% endif %}
-        <div class="spaceevenly" style="height:153px">
+        <div class="spaceevenly fixedImHeight">
         {% for url in info.imageUrls %}
             <div>
               <a href="{{url}}" target="_blank">

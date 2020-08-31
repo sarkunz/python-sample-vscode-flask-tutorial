@@ -1,11 +1,10 @@
 # services- business logic of API
-import datetime
+from datetime import datetime
 import pydicom
 import os
 from .models import CovidAppModel
 import numpy as np
 import logging
-import time
 import uuid
 
 def log(message, type="info"):
@@ -16,7 +15,7 @@ def log(message, type="info"):
         print(message)
 
 def retError(code, message):
-    log(message)
+    log(message, "error")
     return message, code
 
 class CovidAppServices:
@@ -31,19 +30,20 @@ class CovidAppServices:
         data = np.clip(data,a_min=-2000,a_max=None)
         return data
 
-    #yyyymmdd -> yyyy-mm-dd
+    #yyyymmdd -> mm/dd/yyyy
     def formatDate(self, date):
-        return date[:4] + "-" + date[4:6] + "-" + date[6:8]
+        return date[4:6] + "/" + date[6:8] + "/" + date[:4]
+        #return date[:4] + "-" + date[4:6] + "-" + date[6:8] #yyyy-mm-dd
 
-    #hhmmss -> hh:mm:ss
+    #hhmmss -> hh:mm AM/PM (military to regular)
     def formatTime(self, time):
-        return time[:2] + ":" + time[2:4] + ":" + time[4:6]
+        return datetime.strptime(time,'%H%M%S').strftime('%I:%M %p')
+        #return time[:2] + ":" + time[2:4] + ":" + time[4:6] #hh:mm:ss
     
     #takes anonymized file, opens dicom, takes minimal info, writes png
     #adds dicom to work queue, looks up mongo record, creates and rets URL
     def processImage(self, path, dicom, ip_addr):                
         log("processing dicom")
-        st = time.time()
         dicomData = pydicom.dcmread(dicom, force=True)
         if not hasattr(dicomData, 'StudyInstanceUID'):
             return retError(401, "Incorrect File Upload Type")
@@ -55,7 +55,6 @@ class CovidAppServices:
                         'SOPID' : dicomData.SOPClassUID,
                         'imgName' : str(dicom.filename)
                     }
-        log("processed")
         
         #add dicom info to db
         status, uid = self.model.createDbEntry(dicomInfo, ip_addr)
@@ -64,12 +63,9 @@ class CovidAppServices:
 
         #upload dicoms to azure
         pixel_array = self.getHounsfieldUnits(dicomData)
-        logging.info("ACTUAL processing time " +  str(time.time() - st))
-        stup = time.time()
         status = self.model.uploadDicomToBlob(uid, dicomInfo['imgName'], pixel_array) #TODO  change key from accesscode
         if not status:
-            return retError(500, "Failed to upload Dicom to Blob")
-        logging.info("END UP " + str(time.time() - stup))
+            return retError(500, "Failed to upload dicom to container")
 
         # log("END PROCESS SERVICE")
         return 'https://covwebapp.azurewebsites.net/fetchReport/' + uid, 201
