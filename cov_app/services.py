@@ -1,4 +1,5 @@
 # services- business logic of API
+from . import app
 from datetime import datetime
 import pydicom
 import os
@@ -6,6 +7,8 @@ from .models import CovidAppModel
 import numpy as np
 import logging
 import uuid
+import requests
+import json
 
 def log(message, type="info"):
     if type == "error":
@@ -96,16 +99,17 @@ class CovidAppServices:
         return f"https://{account_name}.blob.core.windows.net/{container_name}/{exe_name}?{container_sas_token}"
 
     #get most recent hubspot form entry and create ID from info
-    #TODO START HERE
+    #TODO just gets most recent hubspot entry. better way?
     def createUserID(self):
+        return str(uuid.uuid1())
         #QUERY hub api. 
         url = f"https://api.hubapi.com/form-integrations/v1/submissions/forms/{app.config.get('HUB_FORM_ID')}?hapikey={app.config.get('HUB_API_KEY')}"
-        #Use submittedAt value for UID
-        #id = resp[0].submittedAt
-        id = "userID"
+        resp = requests.get(url)
+        data = json.loads(resp.text)
+        subTime = data["results"][0]['submittedAt']
         #for ids, get most recent id not in db
-        return id
+        return subTime
 
     def saveUserID(self, ipAddr):
-        userID = str(uuid.uuid1()) #self.createUserID()
+        userID = self.createUserID()
         self.model.saveUserID(userID, ipAddr)
