@@ -60,8 +60,16 @@ class CovidAppModel:
     
     def saveUserID(self, userID, ipAddr):
         coll = self.mongoClient.db.installer_access
-        userID = str(uuid.uuid1())
-        coll.update({'userID': userID}, {'userID': userID, 'ip_address': ipAddr}, upsert=True)
+        data = {'userID': userID,
+                'ip_address': ipAddr,
+                'lastAccessed': datetime.utcnow()}
+        #check if userID already added
+        entry = coll.find_one({'userID': userID})
+        if(entry):
+            coll.update({'userID': userID}, data)
+        else: #adds to existing ip entry if exists, else inserts new
+            coll.update({'ip_address': ipAddr}, data, upsert=True)
+        return
 
     def createDbEntry(self, dicomInfo, ipAddr):
         #check for study & series ID (id)
@@ -79,8 +87,9 @@ class CovidAppModel:
             status = self.studies_coll.find_one_and_update(query, {'$set': data})
         else:
             #create new accesscode
-            #TODO always 8 chars- zero pad
-            accessCode = str(int(dicomInfo['studyID'][-3:]) * int(dicomInfo['seriesID'][-3:]) * 23)# str(random.randint(1000, 9999)) #TODO only if this hasn't been set before
+            codeLen = 8 #0 pad to always be 8 chars
+            accessCode = str(int(dicomInfo['studyID'][-3:]) * int(dicomInfo['seriesID'][-3:]) * 23).zfill(codeLen)
+            print("accessCode", accessCode)
             uid = str(uuid.uuid1())
             #add study instance UID, site code, series UID, SOP UID(?), count of imgs(?), last updated time
             data = {'studyID': dicomInfo['studyID'], 
