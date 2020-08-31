@@ -63,12 +63,12 @@ class CovidAppModel:
         data = {'userID': userID,
                 'ip_address': ipAddr,
                 'lastAccessed': datetime.utcnow()}
-        #check if userID already added
-        entry = coll.find_one({'userID': userID})
+        #check if ip_addr already added
+        entry = coll.find_one({'ip_address': ipAddr})
         if(entry):
-            coll.update({'userID': userID}, data)
-        else: #adds to existing ip entry if exists, else inserts new
-            coll.update({'ip_address': ipAddr}, data, upsert=True)
+            coll.update({'ip_address': ipAddr}, data)
+        else: #adds to existing userID entry if exists, else inserts new
+            coll.update({'userID': userID}, data, upsert=True)
         return
 
     def createDbEntry(self, dicomInfo, ipAddr):
@@ -89,7 +89,6 @@ class CovidAppModel:
             #create new accesscode
             codeLen = 8 #0 pad to always be 8 chars
             accessCode = str(int(dicomInfo['studyID'][-3:]) * int(dicomInfo['seriesID'][-3:]) * 23).zfill(codeLen)
-            print("accessCode", accessCode)
             uid = str(uuid.uuid1())
             #add study instance UID, site code, series UID, SOP UID(?), count of imgs(?), last updated time
             data = {'studyID': dicomInfo['studyID'], 
