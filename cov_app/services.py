@@ -106,8 +106,7 @@ class CovidAppServices:
         url = f"https://api.hubapi.com/form-integrations/v1/submissions/forms/{app.config.get('HUB_FORM_ID')}?hapikey={app.config.get('HUB_API_KEY')}"
         resp = requests.get(url)
         data = json.loads(resp.text)
-        subTime = data["results"][0]['submittedAt']
-        #for ids, get most recent id not in db
+        subTime = data["results"][0]['submittedAt'] #most recently submitted hub form. Using submitted time as uid
         return subTime
 
     def saveUserID(self, ipAddr):

@@ -182,7 +182,6 @@ class CovidAppModel:
                 'overall' : overall,
                 'pred': str(conf) + "%", #TODO change back to numProcessed!
                 'percShown': str(math.floor(covCount/entry['numProcessed'] * 10)) + "%",
-                'recommendation' : "It's recommended you do additional clinical testing as per current guidelines and quarentine.",
                 'numModels' : trainInfo['numModels'],
                 'numTrainScans' : trainInfo['numTrainScans'],
                 'numTrainImages' : trainInfo['numTrainImages'],
