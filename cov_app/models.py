@@ -1,17 +1,10 @@
 # models- all db interactions
 from . import app
 from datetime import datetime, timedelta
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, generate_container_sas, ContainerSasPermissions
-generate_container_sas, ContainerSasPermissions
+from azure.storage.blob import BlobServiceClient, generate_container_sas, ContainerSasPermissions
 import os
-import pydicom
-import base64
 from pymongo import MongoClient
-#from . import mongo
-import random
-#import cv2
-from skimage.io import imsave, imread
-import json
+from skimage.io import imsave
 import numpy as np
 import math
 import uuid
@@ -54,7 +47,7 @@ class CovidAppModel:
             container_name=container_name,
             account_key=self.account_key,
             permission=ContainerSasPermissions(read=True),
-            expiry=datetime.utcnow() + timedelta(hours=2)
+            expiry=datetime.utcnow() + timedelta(hours=1)
         )
         return container_sas_token, self.account_name, container_name
     

@@ -1,9 +1,8 @@
 from datetime import datetime
-from flask import Flask, render_template, request, send_file, url_for, redirect
+from flask import Flask, render_template, request, redirect
 from . import app
 from .services import CovidAppServices
 import logging
-import time
 import os
 
 services = CovidAppServices()
@@ -21,7 +20,6 @@ def whatup():
     return redirect("https://www.novarad.net/", code=302)
 
 #inp: dicom, outp: url  
-# auth token in header
 @app.route("/processImage", methods=["GET", "POST"])
 def processImage(): #POST
     log("process image")
@@ -38,10 +36,9 @@ def processImage(): #POST
     return resultUrl, statusCode #url for fetchReport
 
 #fetches report (HTML)
-#inp: access code, outp: html
+#inp: series uid, outp: html
 @app.route("/fetchReport/<uid>")
 def fetchReport(uid): #GET
-    log("fetch image")
     info = services.getReportInfo(uid)
     status = "FINISHED"
     if isinstance(info, str): #if info == "EXPIRED" || "UNFINISHED"
@@ -51,7 +48,6 @@ def fetchReport(uid): #GET
 
 @app.route("/downloadInstaller")
 def downloadInstaller(): #GET
-    log("HERE")
     ip_addr = request.remote_addr
     services.saveUserID(ip_addr)
     exe_name = 'Setup.exe'
