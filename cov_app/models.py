@@ -202,6 +202,7 @@ class CovidAppModel:
         infpt = 0.5313
         hillcoef = -24.7729
         conf = round(1/(1+((maxpred/infpt)**hillcoef)), 3)
+        if(conf == 1): conf = 0.998 #I don't want to commit to 100% confidence -_o_-
         if maxpred < indetCutoff:
             conf = 1 - conf
         conf *= 100
@@ -233,7 +234,7 @@ class CovidAppModel:
             # im_name = line.split(":")[0][0:3] #read im_name as number
             outp = line.split(":")[-1][:-1].split(',')
             # outp.insert(0,im_name) #app im_names as col 0
-            if(len(outp) == 5): #ignore weird empty lines
+            if(len(outp) != 0): #ignore weird empty lines
                 fl_outp = [float(i) for i in outp] 
                 ary.append(fl_outp)
             line = txtfile.readline().strip()
